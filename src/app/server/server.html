@@ -1,0 +1,76 @@
+<!-- Nice Header -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <a class="navbar-brand" href="#">MatchPred</a>
+</nav>
+
+<!-- Main Content Container -->
+<div class="container">
+  <div class="card shadow">
+    <div class="card-header text-center">
+      <h3>Cricket Match Prediction</h3>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="onFetchPrediction()">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="teamAName" class="form-label">Team A</label>
+            <select id="teamAName" class="form-select" [(ngModel)]="teamAName" name="teamAName">
+              <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="teamAOdds" class="form-label">Team A Odds</label>
+            <input type="number" class="form-control" id="teamAOdds" [(ngModel)]="teamAOdds" name="teamAOdds"
+              placeholder="Enter odds for Team A" required>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="teamBName" class="form-label">Team B</label>
+            <select id="teamBName" class="form-select" [(ngModel)]="teamBName" name="teamBName">
+              <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="teamBOdds" class="form-label">Team B Odds</label>
+            <input type="number" class="form-control" id="teamBOdds" [(ngModel)]="teamBOdds" name="teamBOdds"
+              placeholder="Enter odds for Team B" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="userMatchId" class="form-label">Match ID</label>
+          <input type="text" class="form-control" id="userMatchId" [(ngModel)]="userMatchId" name="userMatchId"
+            placeholder="Enter Match ID" required>
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn btn-success">Get Prediction</button>
+        </div>
+      </form>
+      <hr>
+      <div *ngIf="predictionResult">
+        <h5 class="mt-4">Prediction Result</h5>
+        <div class="alert alert-info">
+          <strong>Series:</strong> {{ predictionResult.seriesName }}<br>
+          <strong>Match:</strong> {{ predictionResult.matchDesc }}<br>
+          <strong>Teams:</strong> {{ predictionResult.teamA }} vs {{ predictionResult.teamB }}<br>
+          <strong>Win Chance:</strong>
+          <ul>
+            <li>{{ predictionResult.teamA }}: {{ predictionResult.winChance[predictionResult.teamA] }}%</li>
+            <li>{{ predictionResult.teamB }}: {{ predictionResult.winChance[predictionResult.teamB] }}%</li>
+          </ul>
+          <strong>Market Odds:</strong>
+          <ul>
+            <li>{{ predictionResult.teamA }}: {{ predictionResult.marketOdds[predictionResult.teamA] }}</li>
+            <li>{{ predictionResult.teamB }}: {{ predictionResult.marketOdds[predictionResult.teamB] }}</li>
+          </ul>
+          <strong>Value Bets:</strong>
+          <ul>
+            <li *ngFor="let bet of predictionResult.valueBets">
+              {{ bet.team }} - {{ bet.reason }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
