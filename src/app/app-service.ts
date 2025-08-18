@@ -47,4 +47,20 @@ export class AppService {
   getMatchLineup(matchId: number) {
     return this.http.get(`${this.baseUrl}/matches/${matchId}?include=lineup&api_token=${this.token}`);
   }
+
+  /**
+   * Get upcoming matches (next 10 by date)
+   */
+  getUpcomingMatches(leagueId?: number): Observable<any> {
+    let url = `${this.baseUrl}/fixtures?api_token=${this.token}&sort=date&include=localteam,visitorteam,league,venue`;
+    if (leagueId) {
+      url += `&leagues=${leagueId}`;
+    }
+    url += `&status=NS&per_page=10`;
+    return this.http.get(url);
+  }
+  getSeasonFixtures(seasonId: number): Observable<any> {
+  const url = `${environment.proxyApiUrl}/seasons/${seasonId}`;
+  return this.http.get(url);
+}
 }

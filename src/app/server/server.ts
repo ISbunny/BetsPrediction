@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AppService } from '../app-service';
@@ -12,7 +13,7 @@ import { AppService } from '../app-service';
 export class Server {
   matchId: any;   // put target matchId here
   leagueId: any;    // target league id
-  seasonId: any;    // season id for the league
+  seasonId: number = 1711;    // season id for the league
 
   team1: any;
   team2: any;
@@ -20,19 +21,38 @@ export class Server {
   standings: any;
   h2h: any;
   venue: any;
-
+  upcomingMatches: any[] = [];
+  @ViewChild('loading', { static: true }) loading!: TemplateRef<any>;
   winProbability: { team1: number; team2: number } = { team1: 0, team2: 0 };
   team1Position: number | null = null;
   team2Position: number | null = null;
 
+  // upcomingMatches: any[] = [];
+
   constructor(private appService: AppService) {}
 
   ngOnInit() {
-    this.loadMatchData();
-    this.appService.getMatchesByLeague(this.leagueId).subscribe(matches => {
-      console.log('Matches by League:', matches);
-    });
+    console.log('ngOnInit called, seasonId:', this.seasonId);
+    if (this.seasonId) {
+      this.loadUpcomingMatches();
+    } else {
+      console.warn('seasonId is not set, not loading matches');
+    }
   }
+
+  loadUpcomingMatches() {
+  this.appService.getSeasonFixtures(this.seasonId).subscribe({
+    next: (res: any) => {
+      console.log('Season fixtures response:', res);
+      this.upcomingMatches = (res.data.fixtures || []).filter((f: any) => f.status === 'NS');
+      console.log('Filtered upcoming matches:', this.upcomingMatches);
+    },
+    error: (err) => {
+      console.error('Error loading upcoming matches', err);
+      this.upcomingMatches = [];
+    }
+  });
+}
 
   async loadMatchData() {
     try {
@@ -40,6 +60,7 @@ export class Server {
       const match: any = await this.appService
         .getMatchLineup(this.matchId)
         .toPromise();
+      console.log('Match lineup response:', match);
 
       this.team1 = match.data.localteam;
       this.team2 = match.data.visitorteam;
@@ -50,11 +71,13 @@ export class Server {
       this.h2h = await this.appService
         .getHeadToHead(this.team1.id, this.team2.id)
         .toPromise();
+      console.debug('Head-to-head response:', this.h2h);
 
       // 3) Get Standings
       this.standings = await this.appService
         .getLeagueStandings(this.seasonId)
         .toPromise();
+      console.log('League standings response:', this.standings);
 
       // Set team positions for template
       if (this.standings && this.standings.data) {
@@ -62,6 +85,7 @@ export class Server {
         const t2 = this.standings.data.find((s: any) => s.team_id === this.team2.id);
         this.team1Position = t1 ? t1.position : null;
         this.team2Position = t2 ? t2.position : null;
+        console.log('Team positions:', { team1Position: this.team1Position, team2Position: this.team2Position });
       }
 
       // 4) Calculate Probability

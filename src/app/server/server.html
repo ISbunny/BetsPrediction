@@ -41,15 +41,27 @@
             <li>{{ team2.name }}: {{ winProbability.team2 }}%</li>
           </ul>
         </div>
+        <hr>
+        <h5>Upcoming Matches</h5>
+  <div *ngIf="upcomingMatches.length > 0; else noUpcoming">
+    <ul>
+      <li *ngFor="let match of upcomingMatches">
+        <strong>{{ match.localteam?.name }}</strong> vs <strong>{{ match.visitorteam?.name }}</strong>
+        <span> - {{ match.round }} | {{ match.starting_at | date:'short' }}</span>
+      </li>
+    </ul>
+  </div>
+  <ng-template #noUpcoming>
+    <p>No upcoming matches found.</p>
+  </ng-template>
+  <ng-template #loading>
+    <div class="text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
-      <ng-template #loading>
-        <div class="text-center">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-          <p>Loading match data...</p>
-        </div>
-      </ng-template>
+      <p>Loading match data...</p>
     </div>
+  </ng-template>
+</div>
   </div>
 </div>
