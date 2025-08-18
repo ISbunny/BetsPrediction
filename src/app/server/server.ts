@@ -1,119 +1,124 @@
 import { Component } from '@angular/core';
-import { AppService } from '../app-service';
-import { environment } from '../environment';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { AppService } from '../app-service';
 @Component({
   selector: 'app-server',
   templateUrl: './server.html',
-  styleUrl: './server.css',
-  imports: [FormsModule,CommonModule],
+  styleUrls: ['./server.css'],
+  standalone: true,
+  imports: [FormsModule, CommonModule]
 })
 export class Server {
-  userMatchId: string = '';
-  teamAName: string = '';
-  teamAOdds: number = 0;
-  teamBName: string = '';
-  teamBOdds: number = 0;
-  predictionResult: any = null;
-  teamOptions: string[] = [];
+  matchId: any;   // put target matchId here
+  leagueId: any;    // target league id
+  seasonId: any;    // season id for the league
+
+  team1: any;
+  team2: any;
+  playingXI: any;
+  standings: any;
+  h2h: any;
+  venue: any;
+
+  winProbability: { team1: number; team2: number } = { team1: 0, team2: 0 };
+  team1Position: number | null = null;
+  team2Position: number | null = null;
+
   constructor(private appService: AppService) {}
 
   ngOnInit() {
-    // Optionally call with default values or let user trigger
-    // this.onFetchPrediction();
+    this.loadMatchData();
+    this.appService.getMatchesByLeague(this.leagueId).subscribe(matches => {
+      console.log('Matches by League:', matches);
+    });
   }
 
-  fetchMatchPrediction(matchId: string, marketOdds: { [key: string]: number } = {}): void {
-    this.appService.getMatchPrediction(matchId, environment.rapidApiKey)
-      .subscribe(response => {
-        // console.log('API Response:', response); // Debug line
-        const info = response.matchInfo;
-        const teamA = info.team1.name;
-        const teamB = info.team2.name;
-        this.teamOptions = [teamA, teamB];
-        // If not set, set default selected teams
-        if (!this.teamAName) this.teamAName = teamA;
-        if (!this.teamBName) this.teamBName = teamB;
-        const playersA = info.team1?.playerDetails || [];
-        const playersB = info.team2?.playerDetails || [];
-        // Evaluate strengths
-        const teamAScore = Number(this.evaluateTeamStrength(playersA));
-        const teamBScore = Number(this.evaluateTeamStrength(playersB));
-        const winChanceA = Math.round((teamAScore / (teamAScore + teamBScore)) * 100);
-        const winChanceB = 100 - winChanceA;
-        // Use dynamic marketOdds from parameter
-        const marketProbA = marketOdds[teamA] ? Math.round((1 / marketOdds[teamA]) * 10000 / ((1 / marketOdds[teamA]) + (1 / marketOdds[teamB]))) / 100 : null;
-        const marketProbB = (marketOdds[teamB] && marketProbA !== null) ? 100 - marketProbA : null;
-        // Detect value bets
-        const valueBets: any[] = [];
-        if (marketProbA !== null && winChanceA > marketProbA + 1) {
-          valueBets.push({
-            team: teamA,
-            reason: `Model gives ${winChanceA}%, market gives ${marketProbA}%`
-          });
-        }
-        if (marketProbB !== null && winChanceB > marketProbB + 6) {
-          valueBets.push({
-            team: teamB,
-            reason: `Model gives ${winChanceB}%, market gives ${marketProbB}%`
-          });
-        }
-        // Final result
-        const result = {
-          matchId,
-          seriesName: info.series.name,
-          matchDesc: info.matchDescription,
-          teamA,
-          teamB,
-          winChance: {
-            [teamA]: winChanceA,
-            [teamB]: winChanceB
-          },
-          marketOdds,
-          valueBets
-        };
-        this.predictionResult = result;
-      }, error => {
-        console.error('Error fetching match prediction:', error);
-      });
-  }
+  async loadMatchData() {
+    try {
+      // 1) Get Match Info (teams + venue)
+      const match: any = await this.appService
+        .getMatchLineup(this.matchId)
+        .toPromise();
 
-  onFetchPrediction() {
-    if (!this.userMatchId) {
-      alert('Please enter a valid Match ID.');
-      return;
-    }
-    const marketOdds = {
-      [this.teamAName]: this.teamAOdds,
-      [this.teamBName]: this.teamBOdds
-    };
-    this.fetchMatchPrediction(this.userMatchId, marketOdds);
-  }
+      this.team1 = match.data.localteam;
+      this.team2 = match.data.visitorteam;
+      this.playingXI = match.data.lineup;
+      this.venue = match.data.venue;
 
-  evaluateTeamStrength(players: any[]): string {
-    let score = 0;
-    for (const player of players) {
-      let playerScore = 0;
-      if (player.playing11) playerScore += 10;
-      if (player.isCaptain) playerScore += 5;
-      if (player.isKeeper) playerScore += 4;
-      if (player.battingStyle) playerScore += 3;
-      if (player.bowlingStyle) playerScore += 3;
-      if (player?.seasonalStats) {
-        const stats = player.seasonalStats;
-        if (stats.batting?.runs) {
-          const runs = parseInt(stats.batting.runs);
-          playerScore += Math.min(runs / 10, 10);
-        }
-        if (stats.bowling?.wickets) {
-          const wickets = parseInt(stats.bowling.wickets);
-          playerScore += Math.min(wickets * 1.5, 10);
-        }
+      // 2) Get Head-to-Head
+      this.h2h = await this.appService
+        .getHeadToHead(this.team1.id, this.team2.id)
+        .toPromise();
+
+      // 3) Get Standings
+      this.standings = await this.appService
+        .getLeagueStandings(this.seasonId)
+        .toPromise();
+
+      // Set team positions for template
+      if (this.standings && this.standings.data) {
+        const t1 = this.standings.data.find((s: any) => s.team_id === this.team1.id);
+        const t2 = this.standings.data.find((s: any) => s.team_id === this.team2.id);
+        this.team1Position = t1 ? t1.position : null;
+        this.team2Position = t2 ? t2.position : null;
       }
-      score += playerScore;
+
+      // 4) Calculate Probability
+      this.calculateWinningProbability();
+
+    } catch (err) {
+      console.error('Error loading match data', err);
     }
-    return score.toString();
+  }
+
+  calculateWinningProbability() {
+    let scoreTeam1 = 0;
+    let scoreTeam2 = 0;
+
+    // ✅ Head-to-Head Weight
+    if (this.h2h && this.h2h.data) {
+      const h2hTeam1Wins = this.h2h.data.localteam_wins;
+      const h2hTeam2Wins = this.h2h.data.visitorteam_wins;
+      if (h2hTeam1Wins > h2hTeam2Wins) scoreTeam1 += 20;
+      else if (h2hTeam2Wins > h2hTeam1Wins) scoreTeam2 += 20;
+    }
+
+    // ✅ Current League Standing Weight
+    const team1Standing = this.standings.data.find((s: any) => s.team_id === this.team1.id);
+    const team2Standing = this.standings.data.find((s: any) => s.team_id === this.team2.id);
+    if (team1Standing && team2Standing) {
+      if (team1Standing.position < team2Standing.position) scoreTeam1 += 25;
+      else scoreTeam2 += 25;
+    }
+
+    // ✅ Venue Advantage
+    if (this.venue && this.venue.data) {
+      // simplistic: assume home advantage
+      if (this.venue.data.country_id === this.team1.country_id) scoreTeam1 += 10;
+      if (this.venue.data.country_id === this.team2.country_id) scoreTeam2 += 10;
+    }
+
+    // ✅ Player Performance Weight (simplified: based on total runs in last matches)
+    if (this.playingXI) {
+      const avgRunsTeam1 = this.playingXI
+        .filter((p: any) => p.lineup.team_id === this.team1.id)
+        .reduce((sum: number, p: any) => sum + (p.season?.runs || 20), 0) / 11;
+
+      const avgRunsTeam2 = this.playingXI
+        .filter((p: any) => p.lineup.team_id === this.team2.id)
+        .reduce((sum: number, p: any) => sum + (p.season?.runs || 20), 0) / 11;
+
+      if (avgRunsTeam1 > avgRunsTeam2) scoreTeam1 += 20;
+      else scoreTeam2 += 20;
+    }
+
+    // ✅ Final Normalization
+    const total = scoreTeam1 + scoreTeam2;
+    this.winProbability = {
+      team1: Math.round((scoreTeam1 / total) * 100),
+      team2: Math.round((scoreTeam2 / total) * 100)
+    };
   }
 }
+

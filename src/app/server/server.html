@@ -1,3 +1,4 @@
+
 <!-- Nice Header -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <a class="navbar-brand" href="#">MatchPred</a>
@@ -10,67 +11,45 @@
       <h3>Cricket Match Prediction</h3>
     </div>
     <div class="card-body">
-      <form (ngSubmit)="onFetchPrediction()">
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="teamAName" class="form-label">Team A</label>
-            <select id="teamAName" class="form-select" [(ngModel)]="teamAName" name="teamAName">
-              <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="teamAOdds" class="form-label">Team A Odds</label>
-            <input type="number" class="form-control" id="teamAOdds" [(ngModel)]="teamAOdds" name="teamAOdds"
-              placeholder="Enter odds for Team A" required>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="teamBName" class="form-label">Team B</label>
-            <select id="teamBName" class="form-select" [(ngModel)]="teamBName" name="teamBName">
-              <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="teamBOdds" class="form-label">Team B Odds</label>
-            <input type="number" class="form-control" id="teamBOdds" [(ngModel)]="teamBOdds" name="teamBOdds"
-              placeholder="Enter odds for Team B" required>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label for="userMatchId" class="form-label">Match ID</label>
-          <input type="text" class="form-control" id="userMatchId" [(ngModel)]="userMatchId" name="userMatchId"
-            placeholder="Enter Match ID" required>
-        </div>
-        <div class="text-center">
-          <button type="submit" class="btn btn-success">Get Prediction</button>
-        </div>
-      </form>
-      <hr>
-      <div *ngIf="predictionResult">
-        <h5 class="mt-4">Prediction Result</h5>
-        <div class="alert alert-info">
-          <strong>Series:</strong> {{ predictionResult.seriesName }}<br>
-          <strong>Match:</strong> {{ predictionResult.matchDesc }}<br>
-          <strong>Teams:</strong> {{ predictionResult.teamA }} vs {{ predictionResult.teamB }}<br>
-          <strong>Win Chance:</strong>
+      <div *ngIf="team1 && team2; else loading">
+        <h5>Teams</h5>
+        <p><strong>{{ team1.name }}</strong> vs <strong>{{ team2.name }}</strong></p>
+        <hr>
+        <h5>Venue</h5>
+        <p *ngIf="venue">{{ venue.data.name }} ({{ venue.data.city }}, {{ venue.data.country_id }})</p>
+        <hr>
+        <h5>League Standings</h5>
+        <div *ngIf="standings">
           <ul>
-            <li>{{ predictionResult.teamA }}: {{ predictionResult.winChance[predictionResult.teamA] }}%</li>
-            <li>{{ predictionResult.teamB }}: {{ predictionResult.winChance[predictionResult.teamB] }}%</li>
+            <li>{{ team1.name }} Position: {{ team1Position }}</li>
+            <li>{{ team2.name }} Position: {{ team2Position }}</li>
           </ul>
-          <strong>Market Odds:</strong>
+        </div>
+        <hr>
+        <h5>Head-to-Head</h5>
+        <div *ngIf="h2h">
           <ul>
-            <li>{{ predictionResult.teamA }}: {{ predictionResult.marketOdds[predictionResult.teamA] }}</li>
-            <li>{{ predictionResult.teamB }}: {{ predictionResult.marketOdds[predictionResult.teamB] }}</li>
+            <li>{{ team1.name }} Wins: {{ h2h.data.localteam_wins }}</li>
+            <li>{{ team2.name }} Wins: {{ h2h.data.visitorteam_wins }}</li>
           </ul>
-          <strong>Value Bets:</strong>
+        </div>
+        <hr>
+        <h5>Win Probability</h5>
+        <div *ngIf="winProbability">
           <ul>
-            <li *ngFor="let bet of predictionResult.valueBets">
-              {{ bet.team }} - {{ bet.reason }}
-            </li>
+            <li>{{ team1.name }}: {{ winProbability.team1 }}%</li>
+            <li>{{ team2.name }}: {{ winProbability.team2 }}%</li>
           </ul>
         </div>
       </div>
+      <ng-template #loading>
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p>Loading match data...</p>
+        </div>
+      </ng-template>
     </div>
   </div>
 </div>

@@ -1,30 +1,50 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from './environment';
 // import { environment } from './environment'; // Adjust the import path as necessary
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
+  private baseUrl = environment.sportmonksApiUrl;
+  private token = environment.sportmonksToken;
    constructor(private http: HttpClient) {}
 
-  getMatchPrediction(matchId: string, apiKey: string): Observable<any> {
-    const url = `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchId}`;
-    const headers = new HttpHeaders({
-      'X-RapidAPI-Key': apiKey,
-      'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
-    });
-
-    return this.http.get(url, { headers });
+  getMatchInfo(matchId: number) {
+    return this.http.get(`${this.baseUrl}/fixtures/${matchId}?api_token=${this.token}&include=localteam,visitorteam,venue`);
   }
-  getSeriesInfo(seriesName: string, apiKey: string): Observable<any> {
-  const url = `https://cricbuzz-cricket.p.rapidapi.com/series/v1/${seriesName}`;
-  const headers = new HttpHeaders({
-    'X-RapidAPI-Key': apiKey,
-    'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
-  });
 
-  return this.http.get(url, { headers });
+  getPlayingXI(matchId: number) {
+    return this.http.get(`${this.baseUrl}/fixtures/${matchId}?api_token=${this.token}&include=lineup`);
+  }
+
+  getHeadToHead(teamId1: number, teamId2: number) {
+  return this.http.get(`${this.baseUrl}/head-to-head/${teamId1}/${teamId2}?api_token=${this.token}`);
 }
+
+
+  getLeagueStandings(seasonId: number) {
+    return this.http.get(`${this.baseUrl}/standings/season/${seasonId}?api_token=${this.token}`);
+  }
+
+  getPlayerStats(playerId: number) {
+    return this.http.get(`${this.baseUrl}/players/${playerId}?api_token=${this.token}&include=career,statistics`);
+  }
+
+  getVenueInfo(venueId: number) {
+    return this.http.get(`${this.baseUrl}/venues/${venueId}?api_token=${this.token}`);
+  }
+
+  getLiveScore(matchId: number) {
+    return this.http.get(`${this.baseUrl}/fixtures/${matchId}?api_token=${this.token}&include=scoreboards`);
+  }
+   getMatchesByLeague(leagueId: number) {
+    return this.http.get(`${this.baseUrl}/matches?include=league,season,venue&leagues=${leagueId}&api_token=${this.token}`);
+  }
+
+  getMatchLineup(matchId: number) {
+    return this.http.get(`${this.baseUrl}/matches/${matchId}?include=lineup&api_token=${this.token}`);
+  }
 }

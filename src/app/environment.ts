@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  rapidApiKey: 'eb413cdf00mshcfa10165e6b819ap144149jsn854e7eef45d3'
+  sportmonksToken:'L4cYXeMqcCgF4cId1jf2e55HkzNdjZsr1kLHCCo1prP3LjYKHoXQKqhCjQNx',
+  sportmonksApiUrl: 'https://cricket.sportmonks.com/api/v2.0',
 };
