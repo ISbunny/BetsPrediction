@@ -32,7 +32,7 @@ export class AppService {
 
   // Get Team Standing with SeasonID
   getTeamStandings(seasonId: number): Observable<any> {
-    return this.http.get(`${environment.SPORTMONKS_BASE}/seasons/${seasonId}/standings?api_token=${environment.SPORTMONKS_API_TOKEN}`);
+    return this.http.get(`${environment.SPORTMONKS_BASE}/standings/${seasonId}?api_token=${environment.SPORTMONKS_API_TOKEN}`);
   }
 
   // Get Fixture With Team LineUP
