@@ -24,7 +24,7 @@ export class Server {
     // Optionally call with default values or let user trigger
     // this.onFetchPrediction();
   }
-
+// update here with venue stats
   fetchMatchPrediction(matchId: string, marketOdds: { [key: string]: number } = {}): void {
     this.appService.getMatchPrediction(matchId, environment.rapidApiKey)
       .subscribe(response => {
@@ -37,12 +37,15 @@ export class Server {
         if (!this.teamAName) this.teamAName = teamA;
         if (!this.teamBName) this.teamBName = teamB;
         const playersA = info.team1?.playerDetails || [];
+        console.log('Team A Players:', playersA);
         const playersB = info.team2?.playerDetails || [];
-        // Evaluate strengths
-        const teamAScore = Number(this.evaluateTeamStrength(playersA));
-        const teamBScore = Number(this.evaluateTeamStrength(playersB));
-        const winChanceA = Math.round((teamAScore / (teamAScore + teamBScore)) * 100);
-        const winChanceB = 100 - winChanceA;
+        console.log('Team B Players:', playersB);
+        // Evaluate strengths using robust formula and softmax
+        const teamAScore = this.evaluateTeamStrength(playersA);
+        const teamBScore = this.evaluateTeamStrength(playersB);
+        const [probA, probB] = this.softmax(teamAScore, teamBScore);
+        const winChanceA = Math.round(probA * 100);
+        const winChanceB = Math.round(probB * 100);
         // Use dynamic marketOdds from parameter
         const marketProbA = marketOdds[teamA] ? Math.round((1 / marketOdds[teamA]) * 10000 / ((1 / marketOdds[teamA]) + (1 / marketOdds[teamB]))) / 100 : null;
         const marketProbB = (marketOdds[teamB] && marketProbA !== null) ? 100 - marketProbA : null;
@@ -60,7 +63,6 @@ export class Server {
             reason: `Model gives ${winChanceB}%, market gives ${marketProbB}%`
           });
         }
-        // Final result
         const result = {
           matchId,
           seriesName: info.series.name,
@@ -92,28 +94,46 @@ export class Server {
     this.fetchMatchPrediction(this.userMatchId, marketOdds);
   }
 
-  evaluateTeamStrength(players: any[]): string {
+WEIGHTS = {
+    substitute: 10,
+    captain: 5,
+    keeper: 4,
+    battingStyle: 3,
+    bowlingStyle: 3,
+    runs: 0.05,      // 0.05 points per run
+    wickets: 0.5     // 0.5 points per wicket
+  };
+
+  // More robust team strength calculation using weights
+  evaluateTeamStrength(players: any[]): number {
     let score = 0;
     for (const player of players) {
       let playerScore = 0;
-      if (player.playing11) playerScore += 10;
-      if (player.isCaptain) playerScore += 5;
-      if (player.isKeeper) playerScore += 4;
-      if (player.battingStyle) playerScore += 3;
-      if (player.bowlingStyle) playerScore += 3;
+      if (player.substitute) playerScore += this.WEIGHTS.substitute;
+      if (player.captain) playerScore += this.WEIGHTS.captain;
+      if (player.keeper) playerScore += this.WEIGHTS.keeper;
+      if (player.battingStyle) playerScore += this.WEIGHTS.battingStyle;
+      if (player.bowlingStyle) playerScore += this.WEIGHTS.bowlingStyle;
       if (player?.seasonalStats) {
         const stats = player.seasonalStats;
         if (stats.batting?.runs) {
           const runs = parseInt(stats.batting.runs);
-          playerScore += Math.min(runs / 10, 10);
+          playerScore += runs * this.WEIGHTS.runs;
         }
         if (stats.bowling?.wickets) {
           const wickets = parseInt(stats.bowling.wickets);
-          playerScore += Math.min(wickets * 1.5, 10);
+          playerScore += wickets * this.WEIGHTS.wickets;
         }
       }
       score += playerScore;
     }
-    return score.toString();
+    return score;
+  }
+
+  softmax(a: number, b: number): [number, number] {
+    const expA = Math.exp(a);
+    const expB = Math.exp(b);
+    const sum = expA + expB;
+    return [expA / sum, expB / sum];
   }
 }

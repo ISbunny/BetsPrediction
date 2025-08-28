@@ -18,8 +18,8 @@ export class AppService {
 
     return this.http.get(url, { headers });
   }
-  getSeriesInfo(seriesName: string, apiKey: string): Observable<any> {
-  const url = `https://cricbuzz-cricket.p.rapidapi.com/series/v1/${seriesName}`;
+getPlaying11TeamA(matchId: string, teamId: string, apiKey: string): Observable<any> {
+  const url = `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchId}/team/${teamId}`;
   const headers = new HttpHeaders({
     'X-RapidAPI-Key': apiKey,
     'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
@@ -27,4 +27,22 @@ export class AppService {
 
   return this.http.get(url, { headers });
 }
+getPlaying11TeamB(matchId: string, teamId: string, apiKey: string): Observable<any> {
+  const url = `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchId}/team/${teamId}`;
+  const headers = new HttpHeaders({
+    'X-RapidAPI-Key': apiKey,
+    'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+  });
+
+  return this.http.get(url, { headers });
+}
+ getSeriesList(seriesID: string, apiKey: string): Observable<any> {
+    const url = `https://cricbuzz-cricket.p.rapidapi.com/series/v1/${seriesID}`;
+    const headers = new HttpHeaders({
+      'X-RapidAPI-Key': apiKey,
+      'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    });
+
+    return this.http.get(url, { headers });
+  }
 }
