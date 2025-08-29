@@ -36,4 +36,13 @@ getPlaying11TeamB(matchId: string, teamId: string, apiKey: string): Observable<a
 
   return this.http.get(url, { headers });
 }
+ getSeriesList(seriesID: string, apiKey: string): Observable<any> {
+    const url = `https://cricbuzz-cricket.p.rapidapi.com/series/v1/${seriesID}`;
+    const headers = new HttpHeaders({
+      'X-RapidAPI-Key': apiKey,
+      'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    });
+
+    return this.http.get(url, { headers });
+  }
 }
