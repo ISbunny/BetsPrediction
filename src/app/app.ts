@@ -1,10 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Server } from "./server/server";
+import { ServerComponent } from './server/server';
+import { LoginComponent } from './login/login';
+// If 'Server' is exported as default:
+
 
 @Component({
   selector: 'app-root',
-  imports: [Server],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

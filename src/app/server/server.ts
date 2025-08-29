@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './server.css',
   imports: [FormsModule,CommonModule],
 })
-export class Server {
+export class ServerComponent {
   userMatchId: string = '';
   teamAName: string = '';
   teamAOdds: number = 0;
