@@ -18,6 +18,8 @@ export class Server {
   teamBOdds: number = 0;
   predictionResult: any = null;
   teamOptions: string[] = [];
+  playing11TeamA: any = null;
+  playing11TeamB: any = null;
   constructor(private appService: AppService) {}
 
   ngOnInit() {
@@ -28,55 +30,62 @@ export class Server {
   fetchMatchPrediction(matchId: string, marketOdds: { [key: string]: number } = {}): void {
     this.appService.getMatchPrediction(matchId, environment.rapidApiKey)
       .subscribe(response => {
-        // console.log('API Response:', response); // Debug line
-        const info = response.matchInfo;
-        const teamA = info.team1.name;
-        const teamB = info.team2.name;
+        const teamA = response.team1.teamname;
+        const teamB = response.team2.teamname;
         this.teamOptions = [teamA, teamB];
-        // If not set, set default selected teams
         if (!this.teamAName) this.teamAName = teamA;
         if (!this.teamBName) this.teamBName = teamB;
-        const playersA = info.team1?.playerDetails || [];
-        console.log('Team A Players:', playersA);
-        const playersB = info.team2?.playerDetails || [];
-        console.log('Team B Players:', playersB);
-        // Evaluate strengths using robust formula and softmax
-        const teamAScore = this.evaluateTeamStrength(playersA);
-        const teamBScore = this.evaluateTeamStrength(playersB);
-        const [probA, probB] = this.softmax(teamAScore, teamBScore);
-        const winChanceA = Math.round(probA * 100);
-        const winChanceB = Math.round(probB * 100);
-        // Use dynamic marketOdds from parameter
-        const marketProbA = marketOdds[teamA] ? Math.round((1 / marketOdds[teamA]) * 10000 / ((1 / marketOdds[teamA]) + (1 / marketOdds[teamB]))) / 100 : null;
-        const marketProbB = (marketOdds[teamB] && marketProbA !== null) ? 100 - marketProbA : null;
-        // Detect value bets
-        const valueBets: any[] = [];
-        if (marketProbA !== null && winChanceA > marketProbA + 1) {
-          valueBets.push({
-            team: teamA,
-            reason: `Model gives ${winChanceA}%, market gives ${marketProbA}%`
+
+        // Fetch playing 11 for both teams and evaluate team strength only after both are loaded
+        const teamAId = response.team1.teamid;
+        const teamBId = response.team2.teamid;
+
+        this.appService.getPlaying11TeamA(matchId, teamAId, environment.rapidApiKey).subscribe(dataA => {
+          // Use the entire squad (playing XI + bench) for team strength evaluation
+          const squadA = [
+            ...(dataA.players?.["playing XI"] || []),
+            ...(dataA.players?.bench || [])
+          ];
+          this.playing11TeamA = squadA;
+          console.log('Team A Squad:', squadA);
+
+          this.appService.getPlaying11TeamB(matchId, teamBId, environment.rapidApiKey).subscribe(dataB => {
+            const squadB = [
+              ...(dataB.players?.["playing XI"] || []),
+              ...(dataB.players?.bench || [])
+            ];
+            this.playing11TeamB = squadB;
+            console.log('Team B Squad:', squadB);
+
+            // Now both squads are loaded, evaluate team strengths
+            const teamAScore = this.evaluateTeamStrength(this.playing11TeamA);
+            // console.log('Team A Score:', teamAScore);
+            const teamBScore = this.evaluateTeamStrength(this.playing11TeamB);
+            // console.log('Team B Score:', teamBScore);
+            const [probA, probB] = this.softmax(teamAScore, teamBScore);
+            const winChanceA = Math.round(probA * 100);
+            const winChanceB = Math.round(probB * 100);
+            
+            const result = {
+              matchId,
+              seriesName: response.seriesname,
+              matchDesc: response.matchdesc,
+              teamA,
+              teamB,
+              winChance: {
+                [teamA]: winChanceA,
+                [teamB]: winChanceB
+              },
+          
+            };
+            this.predictionResult = result;
+            // console.log('Prediction Result:', this.predictionResult);
+          }, error => {
+            console.error('Error fetching team squad for Team B:', error);
           });
-        }
-        if (marketProbB !== null && winChanceB > marketProbB + 6) {
-          valueBets.push({
-            team: teamB,
-            reason: `Model gives ${winChanceB}%, market gives ${marketProbB}%`
-          });
-        }
-        const result = {
-          matchId,
-          seriesName: info.series.name,
-          matchDesc: info.matchDescription,
-          teamA,
-          teamB,
-          winChance: {
-            [teamA]: winChanceA,
-            [teamB]: winChanceB
-          },
-          marketOdds,
-          valueBets
-        };
-        this.predictionResult = result;
+        }, error => {
+          console.error('Error fetching playing 11 for Team A:', error);
+        });
       }, error => {
         console.error('Error fetching match prediction:', error);
       });
@@ -101,34 +110,37 @@ WEIGHTS = {
     battingStyle: 3,
     bowlingStyle: 3,
     runs: 0.05,      // 0.05 points per run
-    wickets: 0.5     // 0.5 points per wicket
+    wickets: 0.5,
+    battingAllrounder: 2,
+    bowlingAllrounder: 2,     // 0.5 points per wicket
   };
 
   // More robust team strength calculation using weights
   evaluateTeamStrength(players: any[]): number {
-    let score = 0;
-    for (const player of players) {
-      let playerScore = 0;
-      if (player.substitute) playerScore += this.WEIGHTS.substitute;
-      if (player.captain) playerScore += this.WEIGHTS.captain;
-      if (player.keeper) playerScore += this.WEIGHTS.keeper;
-      if (player.battingStyle) playerScore += this.WEIGHTS.battingStyle;
-      if (player.bowlingStyle) playerScore += this.WEIGHTS.bowlingStyle;
-      if (player?.seasonalStats) {
-        const stats = player.seasonalStats;
-        if (stats.batting?.runs) {
-          const runs = parseInt(stats.batting.runs);
-          playerScore += runs * this.WEIGHTS.runs;
-        }
-        if (stats.bowling?.wickets) {
-          const wickets = parseInt(stats.bowling.wickets);
-          playerScore += wickets * this.WEIGHTS.wickets;
-        }
+  let score = 0;
+  for (const player of players) {
+    let playerScore = 0;
+    if (player.captain) playerScore += this.WEIGHTS.captain;
+    if (player.keeper) playerScore += this.WEIGHTS.keeper;
+    if (player.substitute === false) playerScore += this.WEIGHTS.substitute;
+    if (player.substitute === true) playerScore -= this.WEIGHTS.substitute; // or 0
+    if (player.role === 'Batsman') {
+    if (player.battingStyle) playerScore += this.WEIGHTS.battingStyle;
+    // Optionally, reduce or skip bowlingStyle points for batsmen
+      } else if (player.role === 'Bowler') {
+        if (player.bowlingStyle) playerScore += this.WEIGHTS.bowlingStyle;
+        // Optionally, reduce or skip battingStyle points for bowlers
+      } else {
+        // Allrounder or other roles
+        if (player.battingStyle) playerScore += this.WEIGHTS.battingStyle;
+        if (player.bowlingStyle) playerScore += this.WEIGHTS.bowlingStyle;
       }
-      score += playerScore;
-    }
-    return score;
+      console.log(`Player: ${player.name}, Role: ${player.role}, Score: ${playerScore}`, player);
+    // ...existing code...
+    score += playerScore;
   }
+  return score;
+}
 
   softmax(a: number, b: number): [number, number] {
     const expA = Math.exp(a);
