@@ -27,7 +27,7 @@ export class Server {
     // this.onFetchPrediction();
   }
 // update here with venue stats
-  fetchMatchPrediction(matchId: string, marketOdds: { [key: string]: number } = {}): void {
+  fetchMatchPrediction(matchId: string): void {
     this.appService.getMatchPrediction(matchId, environment.rapidApiKey)
       .subscribe(response => {
         const teamA = response.team1.teamname;
@@ -41,6 +41,7 @@ export class Server {
         const teamBId = response.team2.teamid;
 
         this.appService.getPlaying11TeamA(matchId, teamAId, environment.rapidApiKey).subscribe(dataA => {
+          
           // Use the entire squad (playing XI + bench) for team strength evaluation
           const squadA = [
             ...(dataA.players?.["playing XI"] || []),
@@ -96,11 +97,7 @@ export class Server {
       alert('Please enter a valid Match ID.');
       return;
     }
-    const marketOdds = {
-      [this.teamAName]: this.teamAOdds,
-      [this.teamBName]: this.teamBOdds
-    };
-    this.fetchMatchPrediction(this.userMatchId, marketOdds);
+    this.fetchMatchPrediction(this.userMatchId);
   }
 
 WEIGHTS = {
@@ -117,29 +114,19 @@ WEIGHTS = {
 
   // More robust team strength calculation using weights
   evaluateTeamStrength(players: any[]): number {
-  let score = 0;
-  for (const player of players) {
-    let playerScore = 0;
-    if (player.captain) playerScore += this.WEIGHTS.captain;
-    if (player.keeper) playerScore += this.WEIGHTS.keeper;
-    if (player.substitute === false) playerScore += this.WEIGHTS.substitute;
-    if (player.substitute === true) playerScore -= this.WEIGHTS.substitute; // or 0
-    if (player.role === 'Batsman') {
-    if (player.battingStyle) playerScore += this.WEIGHTS.battingStyle;
-    // Optionally, reduce or skip bowlingStyle points for batsmen
-      } else if (player.role === 'Bowler') {
-        if (player.bowlingStyle) playerScore += this.WEIGHTS.bowlingStyle;
-        // Optionally, reduce or skip battingStyle points for bowlers
-      } else {
-        // Allrounder or other roles
-        if (player.battingStyle) playerScore += this.WEIGHTS.battingStyle;
-        if (player.bowlingStyle) playerScore += this.WEIGHTS.bowlingStyle;
-      }
-      console.log(`Player: ${player.name}, Role: ${player.role}, Score: ${playerScore}`, player);
-    // ...existing code...
-    score += playerScore;
-  }
-  return score;
+    // Improved team strength calculation using player stats from Cricbuzz API
+    let score = 0;
+    for (const player of players) {
+      let playerScore = 0;
+      if (player.captain) playerScore += this.WEIGHTS.captain;
+      if (player.keeper) playerScore += this.WEIGHTS.keeper;
+      if (player.substitute===false) playerScore += this.WEIGHTS.substitute;
+      if (player.battingStyle) playerScore += this.WEIGHTS.battingStyle;
+      if (player.bowlingStyle) playerScore += this.WEIGHTS.bowlingStyle;
+      
+      score += playerScore;
+    }
+    return score;
 }
 
   softmax(a: number, b: number): [number, number] {

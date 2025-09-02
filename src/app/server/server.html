@@ -4,40 +4,28 @@
 </nav>
 
 <!-- Main Content Container -->
-<div class="container">
-  <div class="card shadow">
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow" style="width: 100%; max-width: 500px;">
     <div class="card-header text-center">
       <h3>Cricket Match Prediction</h3>
     </div>
     <div class="card-body">
-      <form (ngSubmit)="onFetchPrediction()">
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="teamAName" class="form-label">Team A</label>
-            <select id="teamAName" class="form-select" [(ngModel)]="teamAName" name="teamAName">
-              <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="teamAOdds" class="form-label">Team A Odds</label>
-            <input type="number" class="form-control" id="teamAOdds" [(ngModel)]="teamAOdds" name="teamAOdds"
-              placeholder="Enter odds for Team A" required>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="teamBName" class="form-label">Team B</label>
-            <select id="teamBName" class="form-select" [(ngModel)]="teamBName" name="teamBName">
-              <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="teamBOdds" class="form-label">Team B Odds</label>
-            <input type="number" class="form-control" id="teamBOdds" [(ngModel)]="teamBOdds" name="teamBOdds"
-              placeholder="Enter odds for Team B" required>
-          </div>
+      <!-- Centered form -->
+      <form class="text-center" (ngSubmit)="onFetchPrediction()">
+        <div class="mb-3">
+          <label for="teamAName" class="form-label">Team A</label>
+          <select id="teamAName" class="form-select" [(ngModel)]="teamAName" name="teamAName">
+            <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
+          </select>
         </div>
         <div class="mb-3">
+          <label for="teamBName" class="form-label">Team B</label>
+          <select id="teamBName" class="form-select" [(ngModel)]="teamBName" name="teamBName">
+            <option *ngFor="let team of teamOptions" [value]="team">{{ team }}</option>
+          </select>
+        </div>
+        <div class="mb-3">  
           <label for="userMatchId" class="form-label">Match ID</label>
           <input type="text" class="form-control" id="userMatchId" [(ngModel)]="userMatchId" name="userMatchId"
             placeholder="Enter Match ID" required>
