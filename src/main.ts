@@ -1,6 +1,11 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { OddsComponent } from './app/odds.component';
+import { importProvidersFrom } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(OddsComponent, {
+  providers: [
+    importProvidersFrom(HttpClientModule, CommonModule)
+  ]
+}).catch(err => console.error(err));
