@@ -41,6 +41,10 @@
           <strong>Series:</strong> {{ predictionResult.seriesName }}<br>
           <strong>Match:</strong> {{ predictionResult.matchDesc }}<br>
           <strong>Teams:</strong> {{ predictionResult.teamA }} vs {{ predictionResult.teamB }}<br>
+          <strong>Current Score:</strong> {{ currentScore }}<br>
+          <strong>Run Rate:</strong> {{ runRate }}<br>
+          <strong>Projected 6 Overs:</strong> {{ projected6 }}<br>
+          <strong>Projected 20 Overs:</strong> {{ projected20 }}<br>
           <strong>Win Chance:</strong>
           <ul>
             <li>{{ predictionResult.teamA }}: {{ predictionResult.winChance[predictionResult.teamA] }}%</li>

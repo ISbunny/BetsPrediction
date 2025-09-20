@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class Server {
   userMatchId: string = '';
+  matchID: any;
   teamAName: string = '';
   teamAOdds: number = 0;
   teamBName: string = '';
@@ -20,48 +21,81 @@ export class Server {
   teamOptions: string[] = [];
   playing11TeamA: any = null;
   playing11TeamB: any = null;
+  runRate: string = '';
+  projected6: number | null = null;
+  projected20: number | null = null;
+  currentScore: string = '';
   constructor(private appService: AppService) {}
 
-  ngOnInit() {
-    // Optionally call with default values or let user trigger
-    // this.onFetchPrediction();
-  }
+  ngOnInit() {}
 // update here with venue stats
   fetchMatchPrediction(matchId: string): void {
     this.appService.getMatchPrediction(matchId, environment.rapidApiKey)
       .subscribe(response => {
         // console.log(response);
-        const teamA = response.matchInfo.team1.name;
-        const teamB = response.matchInfo.team2.name;
+        this.matchID = response.matchid;
+        const teamA = response.team1.teamname;
+        const teamB = response.team2.teamname;
         this.teamOptions = [teamA, teamB];
         this.teamAName = teamA;
         this.teamBName = teamB;
 
         // Fetch playing 11 for both teams and evaluate team strength only after both are loaded
-        const teamAId = response.matchInfo.team1.id;
-        const teamBId = response.matchInfo.team2.id;
+        const teamAId = response.team1.teamid;
+        const teamBId = response.team2.teamid;
+        this.appService.getLiveScore(this.matchID, environment.rapidApiKey).subscribe({
+      next: (data) => {
+        console.log('Live Score Data:', data);
+        const innings = data?.scorecard[0];
+        if (!innings) {
+          this.currentScore = 'Match not started';
+          return;
+        }
 
+        const runs = innings.score;
+        const wickets = innings.wickets;
+        const overs = innings.overs;
+
+        const rr = runs / (overs || 1);
+        let proj6 = rr * 6;
+
+        // Fantasy-style adjustment
+        if (wickets === 0) proj6 *= 1.1; // boost
+        else if (wickets >= 2) proj6 *= 0.9; // penalty
+
+        // Full T20 projection
+        const proj20 = rr * 20;
+
+        this.currentScore = `${runs}/${wickets} in ${overs} overs`;
+        this.runRate = rr.toFixed(2);
+        this.projected6 = Math.round(proj6);
+        this.projected20 = Math.round(proj20);
+      },
+      error: (err) => {
+        console.error('❌ Error fetching score:', err);
+      }
+    });
         this.appService.getPlaying11TeamA(matchId, teamAId, environment.rapidApiKey).subscribe(dataA => {
           // console.log('data',dataA);
           
           // Use the entire squad (playing XI + bench) for team strength evaluation
-          // const squadA = [
-          //   ...(dataA.players?.["playing XI"] || []),
-          //   ...(dataA.players?.bench || [])
-          // ];
+          const squadA = [
+            ...(dataA.players?.["playing XI"] || []),
+            ...(dataA.players?.bench || [])
+          ];
           // full team squadA based on team structure
-          const squadA = Array.isArray(dataA.players?.Squad) ? dataA.players.Squad : [];
+          // const squadA = Array.isArray(dataA.players?.Squad) ? dataA.players.Squad : [];
           // console.log('Team A Squad:', squadA);
           this.playing11TeamA = squadA;
           console.log(teamA + ' Squad:', squadA);
 
           this.appService.getPlaying11TeamB(matchId, teamBId, environment.rapidApiKey).subscribe(dataB => {
-            // const squadB = [
-            //   ...(dataB.players?.["playing XI"] || []),
-            //   ...(dataB.players?.bench || [])
-            // ];
+            const squadB = [
+              ...(dataB.players?.["playing XI"] || []),
+              ...(dataB.players?.bench || [])
+            ];
             // Full Team SquadB
-            const squadB = Array.isArray(dataB.players?.Squad) ? dataB.players.Squad : [];
+            // const squadB = Array.isArray(dataB.players?.Squad) ? dataB.players.Squad : [];
             this.playing11TeamB = squadB;
             console.log(teamB + ' Squad:', squadB);
 
@@ -76,8 +110,8 @@ export class Server {
             
             const result = {
               matchId,
-              seriesName: response.matchInfo.series.name,
-              matchDesc: response.matchInfo.matchDescription,
+              seriesName: response.seriesname,
+              matchDesc: response.matchdesc,
               teamA,
               teamB,
               winChance: {
@@ -105,8 +139,7 @@ export class Server {
       return;
     }
     this.fetchMatchPrediction(this.userMatchId);
-}
-
+  }
 WEIGHTS = {
     substitute: 10,
     captain: 5,
