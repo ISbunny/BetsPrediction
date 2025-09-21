@@ -21,6 +21,19 @@ def generate_synthetic(n_matches=5000, seed=42):
         total_effect = rating_diff + net_venue_adv + (toss_winner_team1 - toss_winner_team2) * 10 + (overs - 20) * 0.5
         true_prob = 1 / (1 + 10 ** (-total_effect / 400))
         result = np.random.binomial(1, true_prob)
+        # Squad-based features (random plausible values)
+        team1_num_batsmen = np.random.randint(3, 6)
+        team1_num_allrounders = np.random.randint(1, 4)
+        team1_num_bowlers = np.random.randint(3, 6)
+        team1_num_wicketkeepers = np.random.randint(1, 2)
+        team1_has_captain = 1
+        team1_squad_size = 11
+        team2_num_batsmen = np.random.randint(3, 6)
+        team2_num_allrounders = np.random.randint(1, 4)
+        team2_num_bowlers = np.random.randint(3, 6)
+        team2_num_wicketkeepers = np.random.randint(1, 2)
+        team2_has_captain = 1
+        team2_squad_size = 11
         rows.append({
             'teamA_rating': teamA_rating,
             'teamB_rating': teamB_rating,
@@ -31,6 +44,18 @@ def generate_synthetic(n_matches=5000, seed=42):
             'toss_winner_team1': toss_winner_team1,
             'toss_winner_team2': toss_winner_team2,
             'overs': overs,
+            'team1_num_batsmen': team1_num_batsmen,
+            'team1_num_allrounders': team1_num_allrounders,
+            'team1_num_bowlers': team1_num_bowlers,
+            'team1_num_wicketkeepers': team1_num_wicketkeepers,
+            'team1_has_captain': team1_has_captain,
+            'team1_squad_size': team1_squad_size,
+            'team2_num_batsmen': team2_num_batsmen,
+            'team2_num_allrounders': team2_num_allrounders,
+            'team2_num_bowlers': team2_num_bowlers,
+            'team2_num_wicketkeepers': team2_num_wicketkeepers,
+            'team2_has_captain': team2_has_captain,
+            'team2_squad_size': team2_squad_size,
             'true_prob': true_prob,
             'target': result
         })

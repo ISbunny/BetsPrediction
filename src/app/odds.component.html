@@ -1,65 +1,96 @@
-<div style="font-family: Arial, sans-serif; padding: 16px;">
-  <h2>Fetch Series Info</h2>
-  <div style="margin-bottom: 12px;">
-    <input [(ngModel)]="seriesId" placeholder="Enter series ID (e.g. 9237)" style="padding:4px; width:180px;" />
-    <button (click)="fetchSeriesInfo()" style="margin-left:8px;">Get Series Info</button>
+<div class="container py-4">
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="card-title">Fetch Series Info</h2>
+      <form class="row g-2 align-items-center mb-3" (ngSubmit)="fetchSeriesInfo()">
+        <div class="col-auto">
+          <input [(ngModel)]="seriesId" name="seriesId" class="form-control" placeholder="Enter series ID (e.g. 9237)" style="width:180px;" />
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">Get Series Info</button>
+        </div>
+      </form>
+      <div *ngIf="loadingSeries" class="text-secondary">Loading series info...</div>
+      <div *ngIf="seriesError" class="text-danger">{{ seriesError }}</div>
+      <div *ngIf="seriesInfo">
+        <h3>Series: {{ seriesInfo.seriesName || seriesInfo.name }}</h3>
+        <div *ngIf="seriesInfo.matchDetails && seriesInfo.matchDetails.length">
+          <h4>Matches:</h4>
+          <ul class="list-group mb-3">
+            <ng-container *ngFor="let md of seriesInfo.matchDetails">
+              <ng-container *ngIf="md.matchDetailsMap && md.matchDetailsMap.match && md.matchDetailsMap.match.length">
+                <li *ngFor="let match of md.matchDetailsMap.match" class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>
+                    {{ match.matchInfo?.team1?.teamName || 'Team 1' }} vs {{ match.matchInfo?.team2?.teamName || 'Team 2' }} -
+                    {{ match.matchInfo?.matchDesc || match.matchDesc || 'No Desc' }}
+                  </span>
+                  <button (click)="fetchPrediction(match)" class="btn btn-outline-success btn-sm">Get Prediction</button>
+                </li>
+              </ng-container>
+            </ng-container>
+          </ul>
+        </div>
+        <div *ngIf="!(seriesInfo.matchDetails && seriesInfo.matchDetails.length)" class="text-muted">No matches found in this series.</div>
+      </div>
+    </div>
   </div>
-  <div *ngIf="loadingSeries">Loading series info...</div>
-  <div *ngIf="seriesError" style="color:red;">{{ seriesError }}</div>
-  <div *ngIf="seriesInfo">
-    <h3>Series: {{ seriesInfo.seriesName || seriesInfo.name }}</h3>
-    <div *ngIf="seriesInfo.matchDetails && seriesInfo.matchDetails.length">
-      <h4>Matches:</h4>
-      <ul>
-        <ng-container *ngFor="let md of seriesInfo.matchDetails">
-          <ng-container *ngIf="md.matchDetailsMap && md.matchDetailsMap.match && md.matchDetailsMap.match.length">
-            <li *ngFor="let match of md.matchDetailsMap.match">
-              {{ match.matchInfo?.team1?.teamName || 'Team 1' }} vs {{ match.matchInfo?.team2?.teamName || 'Team 2' }} -
-              {{ match.matchInfo?.matchDesc || match.matchDesc || 'No Desc' }}
-              <button (click)="fetchPrediction(match)" style="margin-left:8px;">Get Prediction</button>
-            </li>
-          </ng-container>
-        </ng-container>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="card-title">Upcoming Matches</h2>
+      <div *ngIf="error" class="text-danger">Error loading: {{ error }}</div>
+      <div *ngIf="matches.length === 0" class="text-muted">No matches loaded (or API returned unexpected format). Check backend /matches/upcoming</div>
+      <ul class="list-group">
+        <li *ngFor="let m of matches" class="list-group-item mb-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ m.matchInfo?.team1?.teamName || 'Team 1' }} vs {{ m.matchInfo?.team2?.teamName || 'Team 2' }}</strong>
+            </div>
+            <button (click)="fetchPrediction(m)" class="btn btn-outline-primary btn-sm">Get Prediction</button>
+          </div>
+          <div class="text-secondary small mt-1">
+            ID: {{ m.matchInfo?.matchId || m['id'] || m['matchId'] || m['match_id'] || '' }}
+          </div>
+        </li>
       </ul>
     </div>
-    <div *ngIf="!(seriesInfo.matchDetails && seriesInfo.matchDetails.length)">No matches found in this series.</div>
   </div>
-  <h2>Upcoming Matches</h2>
-  <div *ngIf="error" style="color: red;">Error loading: {{ error }}</div>
-  <div *ngIf="matches.length === 0">No matches loaded (or API returned unexpected format). Check backend /matches/upcoming</div>
-  <ul>
-    <li *ngFor="let m of matches" style="margin-bottom:8px;">
-      <div>
-        <strong>{{ m.matchInfo?.team1?.teamName || 'Team 1' }} vs {{ m.matchInfo?.team2?.teamName || 'Team 2' }}</strong>
-        <button (click)="fetchPrediction(m)" style="margin-left:8px;">Get Prediction</button>
-      </div>
-      <div style="font-size: 12px; color: #666;">
-        ID: {{ m.matchInfo?.matchId || m['id'] || m['matchId'] || m['match_id'] || '' }}
-      </div>
-    </li>
-  </ul>
 
-  <div *ngIf="selectedPrediction" style="margin-top: 20px; padding: 12px; border: 1px solid #ddd;">
-    <h3>Prediction</h3>
-    <div><strong>{{ selectedPrediction.team1Name || selectedPrediction.team1 }}</strong> vs <strong>{{ selectedPrediction.team2Name || selectedPrediction.team2 }}</strong></div>
-    <div>Venue: {{ selectedPrediction.venue }}</div>
-    <div>Toss: {{ selectedPrediction.tossWinner }}</div>
-    <div style="display: flex; gap: 32px; margin-top: 12px;">
-      <div>
-        <h4>{{ selectedPrediction.team1Name || selectedPrediction.team1 }}</h4>
-        <div>Model prob: {{ selectedPrediction.model_prob | number:'1.3-3' }}</div>
-        <div>Fair odds: {{ selectedPrediction.fair_odds }}</div>
-        <div>Market odds: {{ selectedPrediction.market_odds }}</div>
-        <div>EV for $1: {{ selectedPrediction.ev_for_1 }}</div>
-        <div>Kelly fraction (25% scaled): {{ selectedPrediction.kelly_fraction }}</div>
-      </div>
-      <div>
-        <h4>{{ selectedPrediction.team2Name || selectedPrediction.team2 }}</h4>
-        <div>Model prob: {{ selectedPrediction.team2_prob | number:'1.3-3' }}</div>
-        <div>Fair odds: {{ selectedPrediction.team2_fair_odds }}</div>
-        <div>Market odds: {{ selectedPrediction.team2_market_odds || 'N/A' }}</div>
-        <div>EV for $1: {{ selectedPrediction.team2_ev_for_1 || 'N/A' }}</div>
-        <div>Kelly fraction (25% scaled): {{ selectedPrediction.team2_kelly_fraction || 'N/A' }}</div>
+  <div *ngIf="selectedPrediction" class="card border-info mb-4">
+    <div class="card-body">
+      <h3 class="card-title">Prediction</h3>
+      <div class="mb-2"><strong>{{ selectedPrediction.team1Name || selectedPrediction.team1 }}</strong> vs <strong>{{ selectedPrediction.team2Name || selectedPrediction.team2 }}</strong></div>
+      <div class="mb-2">Venue: <span class="fw-light">{{ selectedPrediction.venue }}</span></div>
+      <div class="mb-2">Toss: <span class="fw-light">{{ selectedPrediction.tossWinner }}</span></div>
+      <div class="row mt-3">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <div class="card h-100 border-success">
+            <div class="card-body">
+              <h4 class="card-title text-success">{{ selectedPrediction.team1Name || selectedPrediction.team1 }}</h4>
+              <ul class="list-unstyled mb-0">
+                <li>Model prob: <span class="fw-bold">{{ selectedPrediction.model_prob | number:'1.3-3' }}</span></li>
+                <li>Fair odds: <span class="fw-bold">{{ selectedPrediction.fair_odds }}</span></li>
+                <li>Market odds: <span class="fw-bold">{{ selectedPrediction.market_odds }}</span></li>
+                <li>EV for $1: <span class="fw-bold">{{ selectedPrediction.ev_for_1 }}</span></li>
+                <li>Kelly fraction (25% scaled): <span class="fw-bold">{{ selectedPrediction.kelly_fraction }}</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 border-primary">
+            <div class="card-body">
+              <h4 class="card-title text-primary">{{ selectedPrediction.team2Name || selectedPrediction.team2 }}</h4>
+              <ul class="list-unstyled mb-0">
+                <li>Model prob: <span class="fw-bold">{{ selectedPrediction.team2_prob | number:'1.3-3' }}</span></li>
+                <li>Fair odds: <span class="fw-bold">{{ selectedPrediction.team2_fair_odds }}</span></li>
+                <li>Market odds: <span class="fw-bold">{{ selectedPrediction.team2_market_odds || 'N/A' }}</span></li>
+                <li>EV for $1: <span class="fw-bold">{{ selectedPrediction.team2_ev_for_1 || 'N/A' }}</span></li>
+                <li>Kelly fraction (25% scaled): <span class="fw-bold">{{ selectedPrediction.team2_kelly_fraction || 'N/A' }}</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -17,16 +17,19 @@ def prepare_features(df):
     if 'rating_diff_norm' not in df.columns:
         df['rating_diff_norm'] = df['rating_diff'] / 400.0
     # Fill missing columns with 0 if not present
-    for col in [
+    squad_cols = [
+        'team1_num_batsmen', 'team1_num_allrounders', 'team1_num_bowlers', 'team1_num_wicketkeepers', 'team1_has_captain', 'team1_squad_size',
+        'team2_num_batsmen', 'team2_num_allrounders', 'team2_num_bowlers', 'team2_num_wicketkeepers', 'team2_has_captain', 'team2_squad_size'
+    ]
+    base_cols = [
         'teamA_rating', 'teamB_rating', 'rating_diff', 'rating_diff_norm',
         'venue_adv_team1', 'venue_adv_team2', 'net_venue_adv',
-        'toss_winner_team1', 'toss_winner_team2', 'overs']:
+        'toss_winner_team1', 'toss_winner_team2', 'overs'
+    ]
+    for col in base_cols + squad_cols:
         if col not in df.columns:
             df[col] = 0
-    X = df[[
-        'teamA_rating', 'teamB_rating', 'rating_diff', 'rating_diff_norm',
-        'venue_adv_team1', 'venue_adv_team2', 'net_venue_adv',
-        'toss_winner_team1', 'toss_winner_team2', 'overs']].fillna(0)
+    X = df[base_cols + squad_cols].fillna(0)
     y = df['target']
     print("[DEBUG] Training features sample:")
     print(X.head())
