@@ -6,7 +6,7 @@ def name_hash_rating(name):
     return 1400 + s
 
 def prepare_features_from_match_json(match_json):
-    # print("[DEBUG] Full match_json received:", match_json)
+    print("[DEBUG] Full match_json received:", match_json)
     team1 = match_json.get('team1', {}).get('teamname', 'TeamA')
     team2 = match_json.get('team2', {}).get('teamname', 'TeamB')
     team1_id = match_json.get('team1', {}).get('teamid')
@@ -60,7 +60,9 @@ def prepare_features_from_match_json(match_json):
     # Extract squad-based features for both teams
     team1_squad_feats = extract_squad_features(playing11_team1)
     team2_squad_feats = extract_squad_features(playing11_team2)
-    venue = match_json.get('venueinfo', {}).get('ground', 'Unknown')
+    venueinfo = match_json.get('venueinfo') or match_json.get('venueInfo') or {}
+    venue = venueinfo.get('ground', 'Unknown')
+    print("[DEBUG] Extracted venue:", venue)
 
     toss_status = match_json.get('tossstatus', '')
     toss_winner_team1 = 1 if team1 in toss_status else 0
@@ -101,5 +103,26 @@ def prepare_features_from_match_json(match_json):
         'team2_has_captain': team2_squad_feats['has_captain'],
         'team2_squad_size': team2_squad_feats['squad_size'],
     }
+
+    # Venue record feature engineering
+    venue_record = None
+    if 'venueinfo' in match_json and isinstance(match_json['venueinfo'], dict):
+        venue_record = match_json['venueinfo'].get('record', None)
+        if venue_record:
+            # Example: win rates at venue
+            team1_name = match_json['team1']['name'] if isinstance(match_json['team1'], dict) else match_json['team1']
+            team2_name = match_json['team2']['name'] if isinstance(match_json['team2'], dict) else match_json['team2']
+            features['team1_venue_winrate'] = venue_record.get(team1_name, {}).get('winrate', 0.5)
+            features['team2_venue_winrate'] = venue_record.get(team2_name, {}).get('winrate', 0.5)
+            features['venue_winrate_diff'] = features['team1_venue_winrate'] - features['team2_venue_winrate']
+        else:
+            features['team1_venue_winrate'] = 0.5
+            features['team2_venue_winrate'] = 0.5
+            features['venue_winrate_diff'] = 0.0
+    else:
+        features['team1_venue_winrate'] = 0.5
+        features['team2_venue_winrate'] = 0.5
+        features['venue_winrate_diff'] = 0.0
+
     # print("[DEBUG] Features extracted from match_json:", features)
     return features

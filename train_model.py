@@ -11,25 +11,25 @@ from data_gen import generate_synthetic
 MODEL_DIR = "models"
 os.makedirs(MODEL_DIR, exist_ok=True)
 
+FEATURE_COLS = [
+    'teamA_rating', 'teamB_rating', 'rating_diff', 'venue_adv_team1', 'venue_adv_team2',
+    'net_venue_adv', 'toss_winner_team1', 'toss_winner_team2', 'overs',
+    'team1_num_batsmen', 'team1_num_allrounders', 'team1_num_bowlers', 'team1_num_wicketkeepers',
+    'team1_has_captain', 'team1_squad_size', 'team2_num_batsmen', 'team2_num_allrounders',
+    'team2_num_bowlers', 'team2_num_wicketkeepers', 'team2_has_captain', 'team2_squad_size',
+    'team1_venue_winrate', 'team2_venue_winrate', 'venue_winrate_diff'
+]
+
 def prepare_features(df):
     df = df.copy()
     # Add normalized rating diff if not present
     if 'rating_diff_norm' not in df.columns:
         df['rating_diff_norm'] = df['rating_diff'] / 400.0
     # Fill missing columns with 0 if not present
-    squad_cols = [
-        'team1_num_batsmen', 'team1_num_allrounders', 'team1_num_bowlers', 'team1_num_wicketkeepers', 'team1_has_captain', 'team1_squad_size',
-        'team2_num_batsmen', 'team2_num_allrounders', 'team2_num_bowlers', 'team2_num_wicketkeepers', 'team2_has_captain', 'team2_squad_size'
-    ]
-    base_cols = [
-        'teamA_rating', 'teamB_rating', 'rating_diff', 'rating_diff_norm',
-        'venue_adv_team1', 'venue_adv_team2', 'net_venue_adv',
-        'toss_winner_team1', 'toss_winner_team2', 'overs'
-    ]
-    for col in base_cols + squad_cols:
+    for col in FEATURE_COLS + ['rating_diff_norm']:
         if col not in df.columns:
             df[col] = 0
-    X = df[base_cols + squad_cols].fillna(0)
+    X = df[FEATURE_COLS + ['rating_diff_norm']].fillna(0)
     y = df['target']
     print("[DEBUG] Training features sample:")
     print(X.head())
@@ -70,6 +70,7 @@ def train_and_save(df):
     lr = LogisticRegression()
     lr.fit(oof.reshape(-1,1), y)
 
+    # Save the model and feature columns
     joblib.dump({'models': models, 'platt': lr, 'feature_columns': list(X.columns)}, f"{MODEL_DIR}/gbt_ensemble.pkl")
     print(f"Saved model to {MODEL_DIR}/gbt_ensemble.pkl")
 

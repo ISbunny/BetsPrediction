@@ -1,4 +1,3 @@
-
 # --- Imports and setup ---
 import joblib
 import pandas as pd
@@ -52,6 +51,8 @@ class PredictResp(BaseModel):
     market_odds2: Optional[float] = None
     ev_for_1_2: Optional[float] = None
     kelly_fraction_2: Optional[float] = None
+    venue_record: Optional[dict] = None  # <-- Added
+    venue_record_used_in_model: bool = False  # <-- Added
 
 # --- Utility function ---
 def predict_proba_from_features(features):
@@ -115,8 +116,16 @@ def predict(match_id: str):
 
     team1 = (match_json.get('team1') or {}).get('name') if isinstance(match_json.get('team1'), dict) else match_json.get('team1', 'Team1')
     team2 = (match_json.get('team2') or {}).get('name') if isinstance(match_json.get('team2'), dict) else match_json.get('team2', 'Team2')
-    venue = (match_json.get('venue') or {}).get('ground') if isinstance(match_json.get('venue'), dict) else match_json.get('venue', 'Unknown')
-    tossWinner = match_json.get('tossWinner', None)
+    venue = (match_json.get('venueinfo') or {}).get('ground') if isinstance(match_json.get('venueinfo'), dict) else match_json.get('venueinfo', 'Unknown')
+    tossWinner = match_json.get('tossstatus', None)
+
+    # Extract venue record if available
+    venue_record = None
+    if 'venueinfo' in match_json and isinstance(match_json['venueinfo'], dict):
+        venue_record = match_json['venueinfo'].get('record', None)
+
+    # venue_record_used_in_model is False unless you use it in features/model
+    venue_record_used_in_model = True if 'venue_adv_team1' in model_features or 'venue_adv_team2' in model_features else False
 
     return {
         'team1': str(team1) if team1 is not None else "",
@@ -132,7 +141,9 @@ def predict(match_id: str):
         'team2_fair_odds': round(fair_odds2, 3) if fair_odds2 else None,
         'market_odds2': round(market_odds2, 3) if market_odds2 else None,
         'ev_for_1_2': round(ev2, 4) if ev2 is not None else None,
-        'kelly_fraction_2': round(kelly_fraction2, 4) if kelly_fraction2 is not None else None
+        'kelly_fraction_2': round(kelly_fraction2, 4) if kelly_fraction2 is not None else 0.0,
+        'venue_record': venue_record,
+        'venue_record_used_in_model': venue_record_used_in_model
     }
 
 @app.get('/series/{series_id}')

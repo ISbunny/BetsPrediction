@@ -16,6 +16,17 @@ def get_playing11(match_id, team_id):
     resp = requests.get(url, headers=HEADERS, timeout=10)
     resp.raise_for_status()
     return resp.json()
+def get_venue_stats(venue_id):
+    RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY')
+    RAPIDAPI_HOST = os.getenv('RAPIDAPI_HOST', 'cricbuzz-cricket.p.rapidapi.com')
+    HEADERS = {
+        'x-rapidapi-key': RAPIDAPI_KEY,
+        'x-rapidapi-host': RAPIDAPI_HOST
+    }
+    url = f"{BASE}/stats/v1/venue/{venue_id}"
+    resp = requests.get(url, headers=HEADERS, timeout=10)
+    resp.raise_for_status()
+    return resp.json()
 def get_upcoming_matches():
     RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY')
     RAPIDAPI_HOST = os.getenv('RAPIDAPI_HOST', 'cricbuzz-cricket.p.rapidapi.com')
