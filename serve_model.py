@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-from cricbuzz_client import get_upcoming_matches, get_match_center, get_series_info
+from cricbuzz_client import get_upcoming_matches, get_match_center, get_series_info, ScoreCard
 from prepare_features import prepare_features_from_match_json
 import random
 import logging
@@ -16,6 +16,7 @@ import logging
 load_dotenv()
 print(os.getenv('RAPIDAPI_KEY'))
 MODEL_PATH = os.getenv('MODEL_PATH', 'models/gbt_ensemble.pkl')
+FANTASY_MODEL_PATH = os.getenv('FANTASY_MODEL_PATH', 'models/fantasy_regressor.pkl')  # <-- Add this
 VIG = float(os.getenv('VIG', '0.05'))
 
 # Setup logging
@@ -39,6 +40,14 @@ model_obj = joblib.load(MODEL_PATH)
 MODELS = model_obj['models']
 PLATT = model_obj['platt']
 FEATURE_COLS = model_obj['feature_columns']
+
+# --- Fantasy Model ---
+if not os.path.exists(FANTASY_MODEL_PATH):
+    raise RuntimeError(f"Fantasy model not found at {FANTASY_MODEL_PATH}. Train and save fantasy_regressor.pkl first.")
+
+fantasy_model_obj = joblib.load(FANTASY_MODEL_PATH)
+FANTASY_MODEL = fantasy_model_obj['model']
+FANTASY_FEATURE_COLS = fantasy_model_obj['feature_columns']
 
 # --- Pydantic response model ---
 class PredictResp(BaseModel):
@@ -69,6 +78,33 @@ def predict_proba_from_features(features):
     preds = np.mean([m.predict(X, num_iteration=m.best_iteration) for m in MODELS], axis=0)
     prob = float(PLATT.predict_proba(preds.reshape(-1,1))[:,1][0])
     return prob
+
+# --- Fantasy Feature Extraction ---
+def extract_features_from_scorecard(scorecard, window=6):
+    """
+    Extract features from the scorecard for the fantasy regression model.
+    You must match this with your training feature engineering!
+    """
+    # Example: Adjust according to your training features
+    innings = scorecard.get('innings', [{}])[0]
+    runs = innings.get('runs', 0)
+    wickets = innings.get('wickets', 0)
+    overs = float(innings.get('overs', 0))
+    run_rate = innings.get('runRate', 0)
+    # Add more features as per your training
+    features = {
+        'current_runs': runs,
+        'current_wickets': wickets,
+        'current_overs': overs,
+        'current_run_rate': run_rate,
+        # ...add more as needed...
+    }
+    # Fill missing features with 0
+    for c in FANTASY_FEATURE_COLS:
+        if c not in features:
+            features[c] = 0.0
+    X = pd.DataFrame([features])[FANTASY_FEATURE_COLS].fillna(0)
+    return X
 
 # --- API Endpoints ---
 @app.get('/predict/{match_id}', response_model=PredictResp)
@@ -189,4 +225,22 @@ def upcoming():
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# --- Fantasy Score Projection Endpoint ---
+@app.get('/fantasy/score_projection/{match_id}')
+def score_projection(match_id: str, window: int = 6):
+    try:
+        scorecard = ScoreCard(match_id)
+    except Exception as e:
+        logger.error(f"Failed to fetch scorecard for match_id={match_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch scorecard: {e}")
+
+    try:
+        X = extract_features_from_scorecard(scorecard, window=window)
+        pred = float(FANTASY_MODEL.predict(X)[0])
+        logger.info(f"Fantasy projection for match_id={match_id}, window={window}: {pred}")
+        return {"projected_runs_next_N_overs": round(pred, 2)}
+    except Exception as e:
+        logger.error(f"Failed to predict fantasy score for match_id={match_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to predict fantasy score: {e}")
 

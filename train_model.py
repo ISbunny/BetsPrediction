@@ -74,6 +74,27 @@ def train_and_save(df):
     joblib.dump({'models': models, 'platt': lr, 'feature_columns': list(X.columns)}, f"{MODEL_DIR}/gbt_ensemble.pkl")
     print(f"Saved model to {MODEL_DIR}/gbt_ensemble.pkl")
 
+def train_regressor(training_samples, feature_columns):
+    import lightgbm as lgb
+    import pandas as pd
+    import joblib
+
+    df = pd.DataFrame(training_samples)
+    X = df[feature_columns]
+    y = df['target_runs_next_6']
+
+    model = lgb.LGBMRegressor()
+    model.fit(X, y)
+
+    # Save both the model and the feature columns
+    joblib.dump({'model': model, 'feature_columns': list(X.columns)}, 'models/fantasy_regressor.pkl')
+    print("Saved fantasy regression model to models/fantasy_regressor.pkl")
+
+# Example usage:
+# fantasy_samples = ... # your list of dicts with features and 'target_runs_next_6'
+# fantasy_feature_cols = [...] # your list of feature column names
+# train_regressor(fantasy_samples, fantasy_feature_cols)
+
 if __name__ == "__main__":
     df = generate_synthetic(8000)
     train_and_save(df)
