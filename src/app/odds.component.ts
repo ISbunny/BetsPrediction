@@ -20,6 +20,11 @@ export class OddsComponent implements OnInit {
   seriesError: any = null;
   loading = false;
 
+  // Add these:
+  marketOdds1: any;
+  marketOdds2: any;
+  selectedMatch: any = null;
+
   constructor(private odds: OddsService) {}
 
   ngOnInit() {
@@ -49,6 +54,13 @@ export class OddsComponent implements OnInit {
     });
   }
 
+  selectMatch(match: any) {
+    this.selectedMatch = match;
+    this.marketOdds1 = null;
+    this.marketOdds2 = null;
+    this.selectedPrediction = null;
+  }
+
   fetchPrediction(match: any) {
     // Debug: log the match object to see its structure
     console.log('Selected match:', match);
@@ -67,7 +79,8 @@ export class OddsComponent implements OnInit {
       return;
     }
     this.loading = true;
-    this.odds.getPrediction(id).subscribe({
+    // Pass market odds to the service
+    this.odds.getPrediction(id, this.marketOdds1, this.marketOdds2).subscribe({
       next: (res) => {
         // Attach correct team names for UI display
         const team1Name = match.matchInfo?.team1?.teamName || 'Team 1';
@@ -102,6 +115,7 @@ export class OddsComponent implements OnInit {
           team2_kelly_fraction: kelly2
         };
         this.loading = false;
+        this.selectedMatch = null; 
       },
       error: (err) => { console.error(err); this.error = err; this.loading = false; }
     });

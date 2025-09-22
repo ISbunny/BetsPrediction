@@ -2,7 +2,7 @@
 import joblib
 import pandas as pd
 import numpy as np
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,11 +11,16 @@ import os
 from cricbuzz_client import get_upcoming_matches, get_match_center, get_series_info
 from prepare_features import prepare_features_from_match_json
 import random
+import logging
 
 load_dotenv()
 print(os.getenv('RAPIDAPI_KEY'))
 MODEL_PATH = os.getenv('MODEL_PATH', 'models/gbt_ensemble.pkl')
 VIG = float(os.getenv('VIG', '0.05'))
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("serve_model")
 
 app = FastAPI(title="Cricket Odds Predictor (Cricbuzz)")
 
@@ -67,13 +72,22 @@ def predict_proba_from_features(features):
 
 # --- API Endpoints ---
 @app.get('/predict/{match_id}', response_model=PredictResp)
-def predict(match_id: str):
+def predict(
+    match_id: str,
+    market_odds: Optional[float] = Query(None, description="Market odds for team1"),
+    market_odds2: Optional[float] = Query(None, description="Market odds for team2")
+):
+    print("Predict endpoint called!")  # Add this line
+    logger.info(f"Received prediction request for match_id={match_id}, market_odds={market_odds}, market_odds2={market_odds2}")
     try:
         match_json = get_match_center(match_id)
+        logger.info(f"Fetched match_json for match_id={match_id}: {str(match_json)[:500]}")  # Log first 500 chars
     except Exception as e:
+        logger.error(f"Failed fetching match data for match_id={match_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed fetching match data: {e}")
 
     features = prepare_features_from_match_json(match_json)
+    logger.info(f"Prepared features: {features}")
     features['rating_diff_norm'] = features.get('rating_diff', 0.0)/400.0
     model_features = {
         'teamA_rating': features.get('teamA_rating', 1500.0),
@@ -87,15 +101,27 @@ def predict(match_id: str):
         'toss_winner_team2': features.get('toss_winner_team2', 0),
         'overs': features.get('overs', 0.0)
     }
+    venue_features = {k: v for k, v in model_features.items() if 'venue' in k}
+    logger.info(f"Venue-related features used in model: {venue_features}")
+    if any(v != 0 for v in venue_features.values()):
+        logger.info("Venue record IS influencing the model prediction for this match.")
+    else:
+        logger.info("Venue record is NOT influencing the model prediction for this match.")
+    logger.info(f"Model features: {model_features}")
 
     prob = predict_proba_from_features(model_features)
+    logger.info(f"Predicted probability for team1: {prob}")
     fair_odds = 1.0/prob if prob>0 else None
     other = 1.0 - prob
     sum_probs = prob + other
     scale = (1.0 + VIG)/sum_probs
-    # Simulate market odds
-    market_odds = 1.0 / min(max(prob * (1 + VIG + random.uniform(-0.01, 0.03)), 0.01), 0.99)
-    market_odds2 = 1.0 / min(max(other * (1 + VIG + random.uniform(-0.01, 0.03)), 0.01), 0.99)
+
+    if market_odds is None:
+        market_odds = 1.0 / min(max(prob * (1 + VIG + random.uniform(-0.01, 0.03)), 0.01), 0.99)
+        logger.info(f"Simulated market_odds for team1: {market_odds}")
+    if market_odds2 is None:
+        market_odds2 = 1.0 / min(max(other * (1 + VIG + random.uniform(-0.01, 0.03)), 0.01), 0.99)
+        logger.info(f"Simulated market_odds for team2: {market_odds2}")
 
     ev = prob * (market_odds - 1) - (1 - prob) * 1 if market_odds else None
     b = market_odds - 1 if market_odds else 0
@@ -104,7 +130,6 @@ def predict(match_id: str):
     kelly = (b*p - q)/b if b>0 else 0.0
     kelly_fraction = max(0.0, kelly) * 0.25
 
-    # Team2 calculations
     prob2 = other
     fair_odds2 = 1.0/prob2 if prob2>0 else None
     ev2 = prob2 * (market_odds2 - 1) - (1 - prob2) * 1 if market_odds2 else None
@@ -114,20 +139,21 @@ def predict(match_id: str):
     kelly2 = (b2*p2 - q2)/b2 if b2>0 else 0.0
     kelly_fraction2 = max(0.0, kelly2) * 0.25 if market_odds2 else None
 
-    team1 = (match_json.get('team1') or {}).get('name') if isinstance(match_json.get('team1'), dict) else match_json.get('team1', 'Team1')
-    team2 = (match_json.get('team2') or {}).get('name') if isinstance(match_json.get('team2'), dict) else match_json.get('team2', 'Team2')
+    logger.info(f"EV for team1: {ev}, Kelly fraction: {kelly_fraction}")
+    logger.info(f"EV for team2: {ev2}, Kelly fraction 2: {kelly_fraction2}")
+
+    team1 = (match_json.get('team1') or {}).get('teamName') or match_json.get('team1', {}).get('teamname', '')
+    team2 = (match_json.get('team2') or {}).get('teamName') or match_json.get('team2', {}).get('teamname', '')
     venue = (match_json.get('venueinfo') or {}).get('ground') if isinstance(match_json.get('venueinfo'), dict) else match_json.get('venueinfo', 'Unknown')
     tossWinner = match_json.get('tossstatus', None)
 
-    # Extract venue record if available
     venue_record = None
     if 'venueinfo' in match_json and isinstance(match_json['venueinfo'], dict):
         venue_record = match_json['venueinfo'].get('record', None)
 
-    # venue_record_used_in_model is False unless you use it in features/model
     venue_record_used_in_model = True if 'venue_adv_team1' in model_features or 'venue_adv_team2' in model_features else False
 
-    return {
+    response = {
         'team1': str(team1) if team1 is not None else "",
         'team2': str(team2) if team2 is not None else "",
         'venue': str(venue) if venue is not None else "",
@@ -145,6 +171,8 @@ def predict(match_id: str):
         'venue_record': venue_record,
         'venue_record_used_in_model': venue_record_used_in_model
     }
+    logger.info(f"Response: {response}")
+    return response
 
 @app.get('/series/{series_id}')
 def series_info(series_id: str):

@@ -1,5 +1,5 @@
 import math
-from cricbuzz_client import safe_get, get_playing11
+from cricbuzz_client import safe_get, get_playing11, get_venue_stats
 
 def name_hash_rating(name):
     s = sum(ord(c) for c in name) % 300
@@ -62,7 +62,7 @@ def prepare_features_from_match_json(match_json):
     team2_squad_feats = extract_squad_features(playing11_team2)
     venueinfo = match_json.get('venueinfo') or match_json.get('venueInfo') or {}
     venue = venueinfo.get('ground', 'Unknown')
-    print("[DEBUG] Extracted venue:", venue)
+    venue_id = venueinfo.get('id', None)
 
     toss_status = match_json.get('tossstatus', '')
     toss_winner_team1 = 1 if team1 in toss_status else 0
@@ -105,24 +105,24 @@ def prepare_features_from_match_json(match_json):
     }
 
     # Venue record feature engineering
-    venue_record = None
-    if 'venueinfo' in match_json and isinstance(match_json['venueinfo'], dict):
-        venue_record = match_json['venueinfo'].get('record', None)
-        if venue_record:
-            # Example: win rates at venue
-            team1_name = match_json['team1']['name'] if isinstance(match_json['team1'], dict) else match_json['team1']
-            team2_name = match_json['team2']['name'] if isinstance(match_json['team2'], dict) else match_json['team2']
-            features['team1_venue_winrate'] = venue_record.get(team1_name, {}).get('winrate', 0.5)
-            features['team2_venue_winrate'] = venue_record.get(team2_name, {}).get('winrate', 0.5)
+    features['team1_venue_winrate'] = 0.5
+    features['team2_venue_winrate'] = 0.5
+    features['venue_winrate_diff'] = 0.0
+
+    if venue_id:
+        try:
+            venue_stats = get_venue_stats(venue_id)
+            # Adjust the following lines based on the actual structure of venue_stats
+            team1_name = match_json['team1']['teamname'] if isinstance(match_json['team1'], dict) else match_json['team1']
+            team2_name = match_json['team2']['teamname'] if isinstance(match_json['team2'], dict) else match_json['team2']
+            # Example: Suppose venue_stats['teamStats'] is a dict keyed by team name
+            team1_stats = venue_stats.get('teamStats', {}).get(team1_name, {})
+            team2_stats = venue_stats.get('teamStats', {}).get(team2_name, {})
+            features['team1_venue_winrate'] = team1_stats.get('winRate', 0.5)
+            features['team2_venue_winrate'] = team2_stats.get('winRate', 0.5)
             features['venue_winrate_diff'] = features['team1_venue_winrate'] - features['team2_venue_winrate']
-        else:
-            features['team1_venue_winrate'] = 0.5
-            features['team2_venue_winrate'] = 0.5
-            features['venue_winrate_diff'] = 0.0
-    else:
-        features['team1_venue_winrate'] = 0.5
-        features['team2_venue_winrate'] = 0.5
-        features['venue_winrate_diff'] = 0.0
+        except Exception as e:
+            print(f"[DEBUG] Could not fetch or parse venue stats: {e}")
 
     # print("[DEBUG] Features extracted from match_json:", features)
     return features
