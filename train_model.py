@@ -7,7 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss, roc_auc_score, brier_score_loss
 import lightgbm as lgb
 from data_gen import generate_synthetic
-from cricbuzz_client import extract_fantasy_samples
+from cricbuzz_client import ScoreCard, extract_fantasy_samples
 
 MODEL_DIR = "models"
 os.makedirs(MODEL_DIR, exist_ok=True)
@@ -77,6 +77,8 @@ def train_and_save(df):
 
 def train_fantasy_regressor(fantasy_samples):
     df = pd.DataFrame(fantasy_samples)
+    print("[DEBUG] Fantasy DataFrame columns:", df.columns.tolist())
+    print("[DEBUG] Fantasy DataFrame head:\n", df.head())
     feature_columns = ['current_runs', 'current_wickets', 'current_overs', 'current_run_rate', 'phase']
     X = df[feature_columns]
     y = df['target_runs_next_N']
@@ -90,4 +92,28 @@ def train_fantasy_regressor(fantasy_samples):
 if __name__ == "__main__":
     df = generate_synthetic(8000)
     train_and_save(df)
-    # train_fantasy_regressor(all_your_scorecards)  # Uncomment this line to train the fantasy regressor
+
+    # Real match IDs for training the fantasy regressor
+    match_ids = [
+        # Add your real match IDs here, e.g.:
+        # "12345", "23456", ...
+        "130102"
+    ]
+
+    fantasy_samples = []
+    for match_id in match_ids:
+        try:
+            scorecard = ScoreCard(match_id)
+            print(f"[DEBUG] Scorecard for match {match_id}:\n", scorecard)  # <-- Add this line
+            samples = extract_fantasy_samples(scorecard, window=6)
+            if not samples:
+                print(f"[WARNING] No fantasy samples extracted for match {match_id}")
+            fantasy_samples.extend(samples)
+            print(f"[DEBUG] Added {len(samples)} samples from match {match_id}")
+        except Exception as e:
+            print(f"[ERROR] Could not process match {match_id}: {e}")
+
+    print("[DEBUG] First fantasy sample:", fantasy_samples[0] if fantasy_samples else "No samples")
+
+    # Now train the fantasy regressor
+    train_fantasy_regressor(fantasy_samples)
