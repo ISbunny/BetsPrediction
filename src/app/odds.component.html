@@ -35,7 +35,7 @@
     </div>
   </div>
 
-  <div class="card mb-4">
+  <div *ngIf="matches.length > 0" class="card mb-4">
     <div class="card-body">
       <h2 class="card-title">Upcoming Matches</h2>
       <div *ngIf="error" class="text-danger">Error loading: {{ error }}</div>
