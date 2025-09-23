@@ -24,7 +24,7 @@
                     {{ match.matchInfo?.team1?.teamName || 'Team 1' }} vs {{ match.matchInfo?.team2?.teamName || 'Team 2' }} -
                     {{ match.matchInfo?.matchDesc || match.matchDesc || 'No Desc' }}
                   </span>
-                  <button (click)="fetchPrediction(match)" class="btn btn-outline-success btn-sm">Get Prediction</button>
+                  <button (click)="selectMatch(match)" class="btn btn-outline-success btn-sm">Get Prediction</button>
                 </li>
               </ng-container>
             </ng-container>
@@ -46,7 +46,7 @@
             <div>
               <strong>{{ m.matchInfo?.team1?.teamName || 'Team 1' }} vs {{ m.matchInfo?.team2?.teamName || 'Team 2' }}</strong>
             </div>
-            <button (click)="fetchPrediction(m)" class="btn btn-outline-primary btn-sm">Get Prediction</button>
+            <button (click)="selectMatch(m)" class="btn btn-outline-primary btn-sm">Get Prediction</button>
           </div>
           <div class="text-secondary small mt-1">
             ID: {{ m.matchInfo?.matchId || m['id'] || m['matchId'] || m['match_id'] || '' }}
@@ -107,4 +107,22 @@
     </label>
     <button (click)="fetchPrediction(selectedMatch)" class="btn btn-success btn-sm mt-2">Get Prediction</button>
   </div> -->
+
+  <div *ngIf="selectedMatch">
+    <!-- ...existing market odds inputs... -->
+
+    <div class="mt-2">
+      <label>
+        Project runs in next
+        <input type="number" [(ngModel)]="fantasyWindow" min="1" max="20" style="width: 60px;">
+        overs
+      </label>
+      <button (click)="fetchFantasyProjection(selectedMatch)" class="btn btn-info btn-sm ms-2">
+        Project Score
+      </button>
+    </div>
+    <div *ngIf="projectedScore !== null" class="mt-2">
+      <strong>Projected runs in next {{fantasyWindow}} overs:</strong> {{projectedScore}}
+    </div>
+  </div>
 </div>

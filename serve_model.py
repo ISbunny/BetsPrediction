@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-from cricbuzz_client import get_upcoming_matches, get_match_center, get_series_info, ScoreCard
+from cricbuzz_client import get_upcoming_matches, get_match_center, get_series_info, fetch_score
 from prepare_features import prepare_features_from_match_json
 import random
 import logging
@@ -41,7 +41,8 @@ MODELS = model_obj['models']
 PLATT = model_obj['platt']
 FEATURE_COLS = model_obj['feature_columns']
 
-# --- Fantasy Model ---
+# Load fantasy model
+FANTASY_MODEL_PATH = os.getenv('FANTASY_MODEL_PATH', 'models/fantasy_regressor.pkl')
 if not os.path.exists(FANTASY_MODEL_PATH):
     raise RuntimeError(f"Fantasy model not found at {FANTASY_MODEL_PATH}. Train and save fantasy_regressor.pkl first.")
 
@@ -226,21 +227,29 @@ def upcoming():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- Fantasy Score Projection Endpoint ---
 @app.get('/fantasy/score_projection/{match_id}')
 def score_projection(match_id: str, window: int = 6):
-    try:
-        scorecard = ScoreCard(match_id)
-    except Exception as e:
-        logger.error(f"Failed to fetch scorecard for match_id={match_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch scorecard: {e}")
-
-    try:
-        X = extract_features_from_scorecard(scorecard, window=window)
-        pred = float(FANTASY_MODEL.predict(X)[0])
-        logger.info(f"Fantasy projection for match_id={match_id}, window={window}: {pred}")
-        return {"projected_runs_next_N_overs": round(pred, 2)}
-    except Exception as e:
-        logger.error(f"Failed to predict fantasy score for match_id={match_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to predict fantasy score: {e}")
+    scorecard = fetch_score(match_id)
+    # Extract features for the latest over
+    innings = scorecard.get("scorecard", [])[0]
+    overs_list = innings.get("overs", [])
+    if not overs_list:
+        raise HTTPException(status_code=400, detail="No overs data found")
+    over = overs_list[-1]
+    current_runs = sum(o.get("runs", 0) for o in overs_list)
+    wickets = over.get("wickets", 0)
+    over_num = over.get("ovr", 0)
+    rr = current_runs / over_num if over_num > 0 else 0
+    phase = "powerplay" if over_num <= 6 else "middle" if over_num <= 15 else "death"
+    features = {
+        "current_runs": current_runs,
+        "current_wickets": wickets,
+        "current_overs": over_num,
+        "current_run_rate": rr,
+        "phase": phase
+    }
+    # Ensure feature order matches fantasy model training
+    X = pd.DataFrame([features])[FANTASY_FEATURE_COLS]
+    pred = float(FANTASY_MODEL.predict(X)[0])
+    return {"projected_runs_next_N_overs": round(pred, 2)}
 

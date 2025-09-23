@@ -20,4 +20,8 @@ export class OddsService {
   getSeriesInfo(seriesId: string): Observable<any> {
     return this.http.get(`http://localhost:8000/series/${seriesId}`);
   }
+
+  getFantasyProjection(matchId: string, window: number): Observable<any> {
+    return this.http.get(`/api/fantasy/score_projection/${matchId}?window=${window}`);
+  }
 }

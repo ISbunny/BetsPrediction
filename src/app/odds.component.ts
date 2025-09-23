@@ -24,6 +24,8 @@ export class OddsComponent implements OnInit {
   marketOdds1: any;
   marketOdds2: any;
   selectedMatch: any = null;
+  projectedScore: number | null = null;
+  fantasyWindow: number = 6; // default, user can change
 
   constructor(private odds: OddsService) {}
 
@@ -137,6 +139,32 @@ export class OddsComponent implements OnInit {
       error: (err) => {
         this.seriesError = err.message || err;
         this.loadingSeries = false;
+      }
+    });
+  }
+
+  fetchFantasyProjection(match: any) {
+    alert('Fetching fantasy projection for next ' + this.fantasyWindow + ' overs');
+    const id =
+      match['id'] ||
+      match['matchId'] ||
+      match['match_id'] ||
+      match['matchIdStr'] ||
+      match['idStr'] ||
+      (match['matchInfo'] && (match['matchInfo']['matchId'] || match['matchInfo']['id']));
+
+    if (!id) {
+      alert('Cannot find match id in selected item (inspect payload)');
+      return;
+    }
+    this.odds.getFantasyProjection(id, this.fantasyWindow).subscribe({
+      next: (res) => {
+        this.projectedScore = res.projected_runs_next_N_overs;
+        console.log(`Projected runs in next ${this.fantasyWindow} overs:`, this.projectedScore);
+      },
+      error: (err) => {
+        console.error('Fantasy projection error:', err);
+        this.projectedScore = null;
       }
     });
   }

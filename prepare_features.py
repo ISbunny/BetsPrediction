@@ -47,13 +47,13 @@ def prepare_features_from_match_json(match_json):
     if match_id and team1_id:
         try:
             playing11_team1 = get_playing11(match_id, team1_id)
-            # print(f"[DEBUG] Playing XI for {team1} (ID {team1_id}):", playing11_team1)
+            print(f"[DEBUG] Playing XI for {team1} (ID {team1_id}):", playing11_team1)
         except Exception as e:
             print(f"[DEBUG] Could not fetch playing XI for {team1}: {e}")
     if match_id and team2_id:
         try:
             playing11_team2 = get_playing11(match_id, team2_id)
-            # print(f"[DEBUG] Playing XI for {team2} (ID {team2_id}):", playing11_team2)
+            print(f"[DEBUG] Playing XI for {team2} (ID {team2_id}):", playing11_team2)
         except Exception as e:
             print(f"[DEBUG] Could not fetch playing XI for {team2}: {e}")
 
