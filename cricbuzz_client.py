@@ -37,7 +37,12 @@ def ScoreCard(match_id):
     url = f"{BASE}/mcenter/v1/{match_id}/scard"
     resp = requests.get(url, headers=HEADERS, timeout=10)
     resp.raise_for_status()
-    return resp.json()
+    try:
+        return resp.json()
+    except Exception as e:
+        print("[ERROR] Could not parse JSON:", e)
+        print("[ERROR] Response text:", resp.text)
+        raise
 def get_upcoming_matches():
     RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY')
     RAPIDAPI_HOST = os.getenv('RAPIDAPI_HOST', 'cricbuzz-cricket.p.rapidapi.com')
@@ -74,18 +79,6 @@ def get_series_info(series_id):
     resp = requests.get(url, headers=HEADERS, timeout=10)
     resp.raise_for_status()
     return resp.json()
-
-def fetch_score(match_id):
-    RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY')
-    RAPIDAPI_HOST = os.getenv('RAPIDAPI_HOST', 'cricbuzz-cricket.p.rapidapi.com')
-    HEADERS = {
-        'x-rapidapi-key': RAPIDAPI_KEY,
-        'x-rapidapi-host': RAPIDAPI_HOST
-    }
-    url = f"{BASE}/mcenter/v1/{match_id}/scard"
-    resp = requests.get(url, headers=HEADERS, timeout=10)
-    resp.raise_for_status()
-    return resp.json()
 def safe_get(d, path, default=None):
     cur = d
     for p in path.split("."):
@@ -95,16 +88,16 @@ def safe_get(d, path, default=None):
             return default
     return cur
 def extract_fantasy_samples(match_json, window=6):
-    """
-    Extracts samples for fantasy regression: features at each over, target is runs in next N overs.
-    Returns a list of dicts: each dict is a sample for training.
-    """
     data = []
     innings_list = match_json.get("scorecard", [])
     if not innings_list:
+        print("[DEBUG] No innings_list found in match_json")
         return []
-    innings = innings_list[0]  # Use first innings, or loop for both if you want
+    innings = innings_list[0]
     overs_list = innings.get("overs", [])
+    if not overs_list:
+        print("[DEBUG] No overs_list found in innings. Only summary data available.")
+        return []
     # Build a list of cumulative runs at each over
     cumulative_runs = []
     for over in overs_list:
@@ -131,4 +124,5 @@ def extract_fantasy_samples(match_json, window=6):
                 "target_runs_next_N": runs_next_window
             }
             data.append(feat)
+    print("[DEBUG] extract_fantasy_samples: returning type", type(data))
     return data

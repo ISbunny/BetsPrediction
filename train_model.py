@@ -7,7 +7,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss, roc_auc_score, brier_score_loss
 import lightgbm as lgb
 from data_gen import generate_synthetic
-from cricbuzz_client import ScoreCard, extract_fantasy_samples
+from cricbuzz_client import ScoreCard, extract_fantasy_samples, get_match_center
+from dotenv import load_dotenv
+
+load_dotenv()
 
 MODEL_DIR = "models"
 os.makedirs(MODEL_DIR, exist_ok=True)
@@ -94,22 +97,17 @@ if __name__ == "__main__":
     train_and_save(df)
 
     # Real match IDs for training the fantasy regressor
-    match_ids = [
-        # Add your real match IDs here, e.g.:
-        # "12345", "23456", ...
-        "130102"
-    ]
+    match_ids = ['135118', '135119', '135120']  # Add as many as you want
 
     fantasy_samples = []
     for match_id in match_ids:
         try:
-            scorecard = ScoreCard(match_id)
-            print(f"[DEBUG] Scorecard for match {match_id}:\n", scorecard)  # <-- Add this line
+            scorecard = get_match_center(match_id)
+            print(f"[DEBUG] Scorecard for match {match_id}:\n", scorecard)
+            print(f"[DEBUG] Type of scorecard: {type(scorecard)}")
             samples = extract_fantasy_samples(scorecard, window=6)
-            if not samples:
-                print(f"[WARNING] No fantasy samples extracted for match {match_id}")
+            print(f"[DEBUG] Type of samples: {type(samples)}")
             fantasy_samples.extend(samples)
-            print(f"[DEBUG] Added {len(samples)} samples from match {match_id}")
         except Exception as e:
             print(f"[ERROR] Could not process match {match_id}: {e}")
 

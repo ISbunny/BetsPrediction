@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-from cricbuzz_client import get_upcoming_matches, get_match_center, get_series_info, fetch_score
+from cricbuzz_client import get_upcoming_matches, get_match_center, get_series_info, ScoreCard
 from prepare_features import prepare_features_from_match_json
 import random
 import logging
@@ -229,7 +229,9 @@ def upcoming():
 
 @app.get('/fantasy/score_projection/{match_id}')
 def score_projection(match_id: str, window: int = 6):
-    scorecard = fetch_score(match_id)
+    scorecard = get_match_center(match_id)
+    print("Scorecard fetched:", scorecard)  # Debug print
+    print(f"[DEBUG] Type of scorecard: {type(scorecard)}")
     # Extract features for the latest over
     innings = scorecard.get("scorecard", [])[0]
     overs_list = innings.get("overs", [])
