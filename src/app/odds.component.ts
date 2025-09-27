@@ -82,6 +82,7 @@ export class OddsComponent implements OnInit {
     // Pass market odds to the service
     this.odds.getPrediction(id, this.marketOdds1, this.marketOdds2).subscribe({
       next: (res) => {
+        console.log('Prediction response:', res);
         // Attach correct team names for UI display
         const team1Name = match.matchInfo?.team1?.teamName || 'Team 1';
         const team2Name = match.matchInfo?.team2?.teamName || 'Team 2';

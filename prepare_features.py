@@ -26,15 +26,22 @@ def prepare_features_from_match_json(match_json):
             'has_captain': 0,
             'squad_size': 0
         }
-        if not playing11 or 'players' not in playing11 or 'playing XI' not in playing11['players']:
+        if not playing11 or 'player' not in playing11:
             return features
-        squad = playing11['players']['playing XI']
-        features['squad_size'] = len(squad)
-        for p in squad:
+
+        # Find the "playing XI" category
+        playing_xi = []
+        for group in playing11['player']:
+            if group.get('category', '').lower() == 'playing xi':
+                playing_xi = group.get('player', [])
+                break
+
+        features['squad_size'] = len(playing_xi)
+        for p in playing_xi:
             role = (p.get('role') or '').lower()
             if 'batsman' in role:
                 features['num_batsmen'] += 1
-            if 'allrounder' in role:
+            if 'allrounder' in role:  # This will match both "Batting Allrounder" and "Bowling Allrounder"
                 features['num_allrounders'] += 1
             if 'bowler' in role:
                 features['num_bowlers'] += 1
@@ -47,7 +54,7 @@ def prepare_features_from_match_json(match_json):
     if match_id and team1_id:
         try:
             playing11_team1 = get_playing11(match_id, team1_id)
-            # print(f"[DEBUG] Playing XI for {team1} (ID {team1_id}):", playing11_team1)
+            print(f"[DEBUG] Playing XI for {team1} (ID {team1_id}):", playing11_team1)
         except Exception as e:
             print(f"[DEBUG] Could not fetch playing XI for {team1}: {e}")
     if match_id and team2_id:
