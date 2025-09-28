@@ -45,4 +45,14 @@ getPlaying11TeamB(matchId: string, teamId: string, apiKey: string): Observable<a
 
     return this.http.get(url, { headers });
   }
+
+  getLiveScore(matchID:number, apiKey: string): Observable<any> {
+    const url = `https://cricbuzz-cricket.p.rapidapi.com/mcenter/v1/${matchID}/scard`;
+    const headers = new HttpHeaders({
+      'X-RapidAPI-Key': apiKey,
+      'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+    });
+
+    return this.http.get(url, { headers });
+  }
 }
