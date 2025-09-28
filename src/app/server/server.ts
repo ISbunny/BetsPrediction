@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class Server {
   userMatchId: string = '';
-  matchID: any;
+  matchID: number = 0;
   teamAName: string = '';
   teamAOdds: number = 0;
   teamBName: string = '';
@@ -60,7 +60,7 @@ export class Server {
                 const wickets = innings.wickets;
                 const overs = innings.overs;
 
-                const rr = runs / (overs || 1);
+                const rr = overs ? runs / overs : 0;
                 let proj6 = rr * 6;
 
                 // Fantasy-style adjustment
