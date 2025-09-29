@@ -85,23 +85,11 @@ export class Server {
               (dataA) => {
                 console.log('data', dataA);
                 const squadAArray = dataA.player || dataA.players || [];
-                // Use the entire squad (playing XI + bench) for team strength evaluation
-                const squadA =
-                  // If "Squad" exists, use it (for upcoming matches)
-                  squadAArray.find((g: any) => g.category === 'Squad')
-                    ?.player ?? // Otherwise, combine "playing XI" and "bench" (for after toss)
-                  [
-                    ...(squadAArray.find(
-                      (g: any) => g.category === 'playing XI'
-                    )?.player || []),
-                    ...(squadAArray.find((g: any) => g.category === 'bench')
-                      ?.player || []),
-                  ];
-                // full team squadA based on team structure
-                // const squadA = Array.isArray(dataA.players?.Squad) ? dataA.players.Squad : [];
-                // console.log('Team A Squad:', squadA);
-                this.playing11TeamA = squadA;
-                console.log(teamA + ' Squad:', squadA);
+                const playingXI =
+                  squadAArray.find((g: any) => g.category === 'playing XI')
+                    ?.player || [];
+                this.playing11TeamA = playingXI;
+                console.log(teamA + ' Playing XI:', playingXI);
 
                 this.appService
                   .getPlaying11TeamB(matchId, teamBId, environment.rapidApiKey)
@@ -109,22 +97,12 @@ export class Server {
                     (dataB) => {
                       console.log('data', dataB);
                       const squadBArray = dataB.player || dataB.players || [];
-                      const squadB = squadBArray.find(
-                        (g: any) => g.category === 'Squad'
-                      )
-                        ?.player ?? // Otherwise, combine "playing XI" and "bench" (for after toss)
-                      [
-                        ...(squadBArray.find(
+                      const playingXI =
+                        squadBArray.find(
                           (g: any) => g.category === 'playing XI'
-                        )?.player || []),
-                        ...(squadBArray.find((g: any) => g.category === 'bench')
-                          ?.player || []),
-                      ];
-
-                      // Full Team SquadB
-                      // const squadB = Array.isArray(dataB.players?.Squad) ? dataB.players.Squad : [];
-                      this.playing11TeamB = squadB;
-                      console.log(teamB + ' Squad:', squadB);
+                        )?.player || [];
+                      this.playing11TeamB = playingXI;
+                      console.log(teamB + ' Playing XI:', playingXI);
 
                       // Now both squads are loaded, evaluate team strengths
                       const teamAScore = this.evaluateTeamStrength(
@@ -203,22 +181,19 @@ export class Server {
       if (player.isoverseas) playerScore += this.WEIGHTS.overseas;
 
       if (typeof player.role === 'string') {
-        if (player.role.includes('Batting Allrounder'))
+        const role = player.role.toLowerCase();
+        if (role.includes('batting allrounder'))
           playerScore += this.WEIGHTS.battingAllrounder;
-        if (player.role.includes('Bowling Allrounder'))
+        if (role.includes('bowling allrounder'))
           playerScore += this.WEIGHTS.bowlingAllrounder;
-        if (player.role.includes('WK-Batsman'))
-          playerScore += this.WEIGHTS.wkBatsman;
+        if (role.includes('wk-batsman')) playerScore += this.WEIGHTS.wkBatsman;
         if (
-          player.role.includes('Batsman') &&
-          !player.role.includes('Allrounder') &&
-          !player.role.includes('WK-Batsman')
+          role.includes('batsman') &&
+          !role.includes('allrounder') &&
+          !role.includes('wk-batsman')
         )
           playerScore += this.WEIGHTS.batsman;
-        if (
-          player.role.includes('Bowler') &&
-          !player.role.includes('Allrounder')
-        )
+        if (role.includes('bowler') && !role.includes('allrounder'))
           playerScore += this.WEIGHTS.bowler;
       }
 
