@@ -17,7 +17,6 @@ def prepare_features_from_match_json(match_json):
     playing11_team1 = None
     playing11_team2 = None
     def extract_squad_features(playing11):
-        # Returns a dict of squad-based features
         features = {
             'num_batsmen': 0,
             'num_allrounders': 0,
@@ -26,15 +25,20 @@ def prepare_features_from_match_json(match_json):
             'has_captain': 0,
             'squad_size': 0
         }
-        if not playing11 or 'player' not in playing11:
-            return features
-
-        # Find the "playing XI" category
-        playing_xi = []
-        for group in playing11['player']:
-            if group.get('category', '').lower() == 'playing xi':
-                playing_xi = group.get('player', [])
-                break
+        # --- NEW STRUCTURE EXAMPLE ---
+        # If the API now gives playing XI directly:
+        if playing11 and 'playingXI' in playing11:
+            playing_xi = playing11['playingXI']
+        # --- OLD STRUCTURE ---
+        elif playing11 and 'player' in playing11:
+            for group in playing11['player']:
+                if group.get('category', '').lower() == 'playing xi':
+                    playing_xi = group.get('player', [])
+                    break
+            else:
+                playing_xi = []
+        else:
+            playing_xi = []
 
         features['squad_size'] = len(playing_xi)
         for p in playing_xi:

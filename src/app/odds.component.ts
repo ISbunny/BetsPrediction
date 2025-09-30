@@ -34,6 +34,7 @@ export class OddsComponent implements OnInit {
   loadMatches() {
     this.odds.getUpcoming().subscribe({
       next: (res) => {
+        console.log('Cricbuzz API response:', res);
         // Flatten all matches from the nested Cricbuzz API structure
         const matches: any[] = [];
         if (res && Array.isArray(res.typeMatches)) {
