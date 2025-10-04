@@ -27,7 +27,9 @@ export class Server {
   currentScore: string = '';
   constructor(private appService: AppService) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.fetchSeries();
+  }
   // update here with venue stats
   fetchMatchPrediction(matchId: string): void {
     this.appService
@@ -105,34 +107,30 @@ export class Server {
                       console.log(teamB + ' Playing XI:', playingXI);
 
                       // Now both squads are loaded, evaluate team strengths
-                      const teamAScore = this.evaluateTeamStrength(
-                        this.playing11TeamA
-                      );
-                      // console.log('Team A Score:', teamAScore);
-                      const teamBScore = this.evaluateTeamStrength(
-                        this.playing11TeamB
-                      );
-                      // console.log('Team B Score:', teamBScore);
-                      const [probA, probB] = this.softmax(
-                        teamAScore,
-                        teamBScore
-                      );
-                      const winChanceA = Math.round(probA * 100);
-                      const winChanceB = Math.round(probB * 100);
+                      Promise.all([
+                        this.fetchAndAttachPlayerStats(this.playing11TeamA),
+                        this.fetchAndAttachPlayerStats(this.playing11TeamB),
+                      ]).then(([teamAWithStats, teamBWithStats]) => {
+                        const teamAScore = this.evaluateTeamStrength(teamAWithStats);
+                        const teamBScore = this.evaluateTeamStrength(teamBWithStats);
+                        const [probA, probB] = this.hardWinChance(teamAScore, teamBScore);
+                        const winChanceA = probA;
+                        const winChanceB = probB;
 
-                      const result = {
-                        matchId,
-                        seriesName: response.seriesname,
-                        matchDesc: response.matchdesc,
-                        teamA,
-                        teamB,
-                        winChance: {
-                          [teamA]: winChanceA,
-                          [teamB]: winChanceB,
-                        },
-                      };
-                      this.predictionResult = result;
-                      // console.log('Prediction Result:', this.predictionResult);
+                        const result = {
+                          matchId,
+                          seriesName: response.seriesname,
+                          matchDesc: response.matchdesc,
+                          teamA,
+                          teamB,
+                          winChance: {
+                            [teamA]: winChanceA,
+                            [teamB]: winChanceB,
+                          },
+                        };
+                        this.predictionResult = result;
+                        // console.log('Prediction Result:', this.predictionResult);
+                      });
                     },
                     (error) => {
                       console.error(
@@ -180,6 +178,20 @@ export class Server {
       if (player.keeper) playerScore += this.WEIGHTS.keeper;
       if (player.isoverseas) playerScore += this.WEIGHTS.overseas;
 
+      // Use player stats if available
+      if (typeof player.battingAverage === 'number' && player.battingAverage > 0) {
+        playerScore += player.battingAverage * 0.2; // weight for batting average
+      }
+      if (typeof player.strikeRate === 'number' && player.strikeRate > 0) {
+        playerScore += player.strikeRate * 0.05; // weight for strike rate
+      }
+      if (typeof player.bowlingAverage === 'number' && player.bowlingAverage > 0) {
+        playerScore += (50 - player.bowlingAverage) * 0.2; // lower avg is better
+      }
+      if (typeof player.economyRate === 'number' && player.economyRate > 0) {
+        playerScore += (10 - player.economyRate) * 0.5; // lower econ is better
+      }
+
       if (typeof player.role === 'string') {
         const role = player.role.toLowerCase();
         if (role.includes('batting allrounder'))
@@ -208,4 +220,74 @@ export class Server {
     const sum = expA + expB;
     return [expA / sum, expB / sum];
   }
+
+  hardWinChance(a: number, b: number): [number, number] {
+    if (a === b) return [50, 50];
+    return a > b ? [100, 0] : [0, 100];
+  }
+
+  fetchSeries() : void {
+    this.appService.GetSeriesArchieve(2025, environment.rapidApiKey).subscribe(
+      (response) => {
+        console.log('Series Archive Response:', response);
+      },
+      (error) => {
+        console.error('Error fetching series archive:', error);
+      }
+    );
+  }
+
+  async fetchAndAttachPlayerStats(players: any[]): Promise<any[]> {
+    const apiKey = environment.rapidApiKey;
+    for (const player of players) {
+      try {
+        const battingStatsRaw = await this.appService.getPlayerBattingStats(player.id, apiKey).toPromise();
+        await delay(300); // 300ms delay to avoid rate limit
+        const bowlingStatsRaw = await this.appService.getPlayerBowlingStats(player.id, apiKey).toPromise();
+        await delay(300);
+
+        const battingStats = battingStatsRaw as any;
+        const bowlingStats = bowlingStatsRaw as any;
+
+        // console.log(`Bowling stats raw for ${player.name}:`, bowlingStatsRaw);
+
+        const batHeaders = battingStats?.headers || [];
+        const t20BatIdx = batHeaders.indexOf('T20');
+        if (t20BatIdx > -1) {
+          for (const row of battingStats.values) {
+            if (row.values[0] === 'Average') {
+              player.battingAverage = parseFloat(row.values[t20BatIdx]) || 0;
+            }
+            if (row.values[0] === 'SR') {
+              player.strikeRate = parseFloat(row.values[t20BatIdx]) || 0;
+            }
+          }
+        }
+
+        const bowlHeaders = bowlingStats?.headers || [];
+        const t20BowlIdx = bowlHeaders.indexOf('T20');
+        if (t20BowlIdx > -1) {
+          for (const row of bowlingStats.values) {
+            if (row.values[0] === 'Avg') {
+              player.bowlingAverage = parseFloat(row.values[t20BowlIdx]) || 0;
+            }
+            if (row.values[0] === 'Eco') {
+              player.economyRate = parseFloat(row.values[t20BowlIdx]) || 0;
+            }
+          }
+        }
+
+        console.log(
+          `Stats for ${player.name}: BatAvg=${player.battingAverage}, SR=${player.strikeRate}, BowlAvg=${player.bowlingAverage}, Econ=${player.economyRate}`
+        );
+      } catch (e) {
+        console.warn(`Stats not found for player ${player.name}:`, e);
+      }
+    }
+    return players;
+  }
+}
+
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

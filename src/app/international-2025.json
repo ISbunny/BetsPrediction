@@ -1,0 +1,546 @@
+{
+  "date": "2025",
+  "series": [
+    {
+      "id": 9629,
+      "name": "West Indies tour of India, 2025",
+      "startDt": "1759363200000",
+      "endDt": "1760400000000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 10840,
+      "name": "Afghanistan vs Bangladesh in UAE 2025",
+      "startDt": "1759363200000",
+      "endDt": "1760400000000"
+    },
+    {
+      "id": 10201,
+      "name": "Australia tour of New Zealand, 2025",
+      "startDt": "1759276800000",
+      "endDt": "1759536000000"
+    },
+    {
+      "id": 11016,
+      "name": "Kuwait tour of Oman, 2025",
+      "startDt": "1759104000000",
+      "endDt": "1759190400000"
+    },
+    {
+      "id": 10091,
+      "name": "West Indies vs Nepal in UAE, 2025",
+      "startDt": "1758931200000",
+      "endDt": "1759190400000"
+    },
+    {
+      "id": 10944,
+      "name": "ICC Mens T20 World Cup Africa Regional Final 2025",
+      "startDt": "1758844800000",
+      "endDt": "1759536000000"
+    },
+    {
+      "id": 8802,
+      "name": "England tour of Ireland, 2025",
+      "startDt": "1758067200000",
+      "endDt": "1758412800000"
+    },
+    {
+      "id": 10928,
+      "name": "Namibia tour of Zimbabwe 2025",
+      "startDt": "1757894400000",
+      "endDt": "1758153600000"
+    },
+    {
+      "id": 10917,
+      "name": "Mozambique tour of Eswatini 2025",
+      "startDt": "1757635200000",
+      "endDt": "1757808000000"
+    },
+    {
+      "id": 10587,
+      "name": "Asia Cup 2025",
+      "startDt": "1757376000000",
+      "endDt": "1759017600000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 10812,
+      "name": "Sweden tour of Isle Of Man 2025",
+      "startDt": "1757116800000",
+      "endDt": "1757203200000"
+    },
+    {
+      "id": 8788,
+      "name": "South Africa tour of England, 2025",
+      "startDt": "1756771200000",
+      "endDt": "1757808000000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 10801,
+      "name": "Switzerland tour of Guernsey, 2025",
+      "startDt": "1756512000000",
+      "endDt": "1756598400000"
+    },
+    {
+      "id": 10647,
+      "name": "Netherlands tour of Bangladesh 2025",
+      "startDt": "1756512000000",
+      "endDt": "1756857600000"
+    },
+    {
+      "id": 10790,
+      "name": "Eastern Europe Cup 2025",
+      "startDt": "1756425600000",
+      "endDt": "1756598400000"
+    },
+    {
+      "id": 10642,
+      "name": "United Arab Emirates T20I Tri-Series 2025",
+      "startDt": "1756425600000",
+      "endDt": "1757203200000"
+    },
+    {
+      "id": 10267,
+      "name": "Sri Lanka tour of Zimbabwe, 2025",
+      "startDt": "1756425600000",
+      "endDt": "1757203200000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 10746,
+      "name": "Belgium tour of Austria 2025",
+      "startDt": "1755907200000",
+      "endDt": "1755993600000"
+    },
+    {
+      "id": 10719,
+      "name": "Czech Republic tour of Romania 2025",
+      "startDt": "1755734400000",
+      "endDt": "1755820800000"
+    },
+    {
+      "id": 9686,
+      "name": "India tour of Bangladesh, 2025 (Called off)",
+      "startDt": "1755388800000",
+      "endDt": "1756598400000"
+    },
+    {
+      "id": 10658,
+      "name": "Norway T20I Tri-Series 2025",
+      "startDt": "1755388800000",
+      "endDt": "1755388800000"
+    },
+    {
+      "id": 10713,
+      "name": "Papua New Guinea tour of Guernsey 2025",
+      "startDt": "1755129600000",
+      "endDt": "1755129600000"
+    },
+    {
+      "id": 9602,
+      "name": "South Africa tour of Australia, 2025",
+      "startDt": "1754784000000",
+      "endDt": "1755993600000"
+    },
+    {
+      "id": 10598,
+      "name": "Cyprus tour of Croatia 2025",
+      "startDt": "1754524800000",
+      "endDt": "1754611200000"
+    },
+    {
+      "id": 10609,
+      "name": "Viking Cup 2025",
+      "startDt": "1754524800000",
+      "endDt": "1754784000000"
+    },
+    {
+      "id": 10465,
+      "name": "Switzerland tour of Estonia, 2025",
+      "startDt": "1754092800000",
+      "endDt": "1754179200000"
+    },
+    {
+      "id": 9399,
+      "name": "Pakistan tour of West Indies, 2025",
+      "startDt": "1754006400000",
+      "endDt": "1754956800000"
+    },
+    {
+      "id": 9584,
+      "name": "New Zealand tour of Zimbabwe, 2025",
+      "startDt": "1753833600000",
+      "endDt": "1754870400000"
+    },
+    {
+      "id": 10443,
+      "name": "Finland tour of Estonia 2025",
+      "startDt": "1753401600000",
+      "endDt": "1753574400000"
+    },
+    {
+      "id": 10498,
+      "name": "Budapest Cup, 2025",
+      "startDt": "1753401600000",
+      "endDt": "1753574400000"
+    },
+    {
+      "id": 10256,
+      "name": "Pakistan tour of Bangladesh, 2025",
+      "startDt": "1752969600000",
+      "endDt": "1753315200000"
+    },
+    {
+      "id": 10471,
+      "name": "Rwanda T20I Tri-Series, 2025",
+      "startDt": "1752796800000",
+      "endDt": "1753574400000"
+    },
+    {
+      "id": 10421,
+      "name": "Asia Pacific Cricket Champions Trophy 2025",
+      "startDt": "1752796800000",
+      "endDt": "1753488000000"
+    },
+    {
+      "id": 10432,
+      "name": "Saudi Arabia tour of Qatar 2025",
+      "startDt": "1752796800000",
+      "endDt": "1753228800000"
+    },
+    {
+      "id": 10410,
+      "name": "Pearl of Africa T20I Series 2025",
+      "startDt": "1752710400000",
+      "endDt": "1753574400000"
+    },
+    {
+      "id": 9587,
+      "name": "Zimbabwe T20I Tri-Series, 2025",
+      "startDt": "1752451200000",
+      "endDt": "1753488000000"
+    },
+    {
+      "id": 10190,
+      "name": "Bulgaria T20I Tri-Series 2025",
+      "startDt": "1752105600000",
+      "endDt": "1752364800000"
+    },
+    {
+      "id": 10168,
+      "name": "Indonesia T20I Tri-Series 2025",
+      "startDt": "1751760000000",
+      "endDt": "1752364800000"
+    },
+    {
+      "id": 10108,
+      "name": "ICC Mens T20 World Cup Europe Qualifier 2025",
+      "startDt": "1751673600000",
+      "endDt": "1752192000000"
+    },
+    {
+      "id": 10278,
+      "name": "Quadrangular T20I Series in Malawi 2025",
+      "startDt": "1751673600000",
+      "endDt": "1752364800000"
+    },
+    {
+      "id": 9578,
+      "name": "South Africa tour of Zimbabwe, 2025",
+      "startDt": "1751068800000",
+      "endDt": "1752105600000"
+    },
+    {
+      "id": 10157,
+      "name": "Continental Cup, 2025",
+      "startDt": "1750896000000",
+      "endDt": "1751155200000"
+    },
+    {
+      "id": 9408,
+      "name": "Australia tour of West Indies, 2025",
+      "startDt": "1750809600000",
+      "endDt": "1753660800000"
+    },
+    {
+      "id": 9899,
+      "name": "Slovenia tour of Hungary, 2025",
+      "startDt": "1750464000000",
+      "endDt": "1750550400000"
+    },
+    {
+      "id": 9908,
+      "name": "Switzerland tour of Luxembourg, 2025",
+      "startDt": "1750464000000",
+      "endDt": "1750550400000"
+    },
+    {
+      "id": 8786,
+      "name": "India tour of England, 2025",
+      "startDt": "1750377600000",
+      "endDt": "1754265600000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 9809,
+      "name": "Bangladesh tour of Sri Lanka, 2025",
+      "startDt": "1750118400000",
+      "endDt": "1752624000000"
+    },
+    {
+      "id": 10036,
+      "name": "Norway tour of Denmark, 2025",
+      "startDt": "1749945600000",
+      "endDt": "1749945600000"
+    },
+    {
+      "id": 9737,
+      "name": "Scotland T20I Tri-Series 2025",
+      "startDt": "1749945600000",
+      "endDt": "1750377600000"
+    },
+    {
+      "id": 9992,
+      "name": "ICC Mens T20 World Cup Americas Region Final 2025",
+      "startDt": "1749945600000",
+      "endDt": "1750550400000"
+    },
+    {
+      "id": 10031,
+      "name": "Nordic T20I Cup 2025",
+      "startDt": "1749772800000",
+      "endDt": "1749945600000"
+    },
+    {
+      "id": 9981,
+      "name": "Cambodia tour of Indonesia, 2025",
+      "startDt": "1749600000000",
+      "endDt": "1749945600000"
+    },
+    {
+      "id": 8881,
+      "name": "ICC World Test Championship Final 2025",
+      "startDt": "1749600000000",
+      "endDt": "1749945600000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 10080,
+      "name": "Quadrangular T20I Series in Canada, 2025",
+      "startDt": "1749600000000",
+      "endDt": "1749859200000"
+    },
+    {
+      "id": 9827,
+      "name": "Central Europe Cup 2025",
+      "startDt": "1749340800000",
+      "endDt": "1749513600000"
+    },
+    {
+      "id": 9911,
+      "name": "Slovenia tour of Serbia, 2025",
+      "startDt": "1749254400000",
+      "endDt": "1749340800000"
+    },
+    {
+      "id": 9954,
+      "name": "Guernsey tour of Jersey, 2025",
+      "startDt": "1749168000000",
+      "endDt": "1749254400000"
+    },
+    {
+      "id": 9920,
+      "name": "Switzerland tour of Austria, 2025",
+      "startDt": "1748563200000",
+      "endDt": "1748736000000"
+    },
+    {
+      "id": 9818,
+      "name": "Mdina Cup 2025",
+      "startDt": "1748563200000",
+      "endDt": "1748736000000"
+    },
+    {
+      "id": 8796,
+      "name": "West Indies tour of England, 2025",
+      "startDt": "1748476800000",
+      "endDt": "1749513600000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 9785,
+      "name": "Bangladesh tour of Pakistan, 2025",
+      "startDt": "1748390400000",
+      "endDt": "1748736000000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 9390,
+      "name": "West Indies tour of Ireland, 2025",
+      "startDt": "1747785600000",
+      "endDt": "1749945600000"
+    },
+    {
+      "id": 9857,
+      "name": "Slovenia tour of Austria 2025",
+      "startDt": "1747440000000",
+      "endDt": "1747526400000"
+    },
+    {
+      "id": 9800,
+      "name": "Bangladesh tour of UAE, 2025",
+      "startDt": "1747440000000",
+      "endDt": "1747785600000"
+    },
+    {
+      "id": 7065,
+      "name": "Zimbabwe tour of England, 2025",
+      "startDt": "1747267200000",
+      "endDt": "1748131200000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 9731,
+      "name": "Cook Islands tour of Japan, 2025",
+      "startDt": "1747094400000",
+      "endDt": "1747180800000"
+    },
+    {
+      "id": 9728,
+      "name": "Japan T20I Tri-Series, 2025",
+      "startDt": "1746576000000",
+      "endDt": "1746921600000"
+    },
+    {
+      "id": 9719,
+      "name": "Estonia tour of Malta, 2025",
+      "startDt": "1746489600000",
+      "endDt": "1746576000000"
+    },
+    {
+      "id": 9710,
+      "name": "Malaysia Quadrangular T20I Series, 2025",
+      "startDt": "1745452800000",
+      "endDt": "1746144000000"
+    },
+    {
+      "id": 9514,
+      "name": "Zimbabwe tour of Bangladesh, 2025",
+      "startDt": "1745107200000",
+      "endDt": "1746144000000"
+    },
+    {
+      "id": 9677,
+      "name": "The North American T20 Cup, 2025",
+      "startDt": "1745020800000",
+      "endDt": "1745712000000"
+    },
+    {
+      "id": 9692,
+      "name": "Central American Cricket Championships, 2025",
+      "startDt": "1744848000000",
+      "endDt": "1745107200000"
+    },
+    {
+      "id": 9647,
+      "name": "Hong Kong T20I Quadrangular Series, 2025",
+      "startDt": "1744156800000",
+      "endDt": "1744502400000"
+    },
+    {
+      "id": 9534,
+      "name": "Portugal tour of Norway, 2025",
+      "startDt": "1743984000000",
+      "endDt": "1744156800000"
+    },
+    {
+      "id": 9523,
+      "name": "Canada tour of Namibia, 2025",
+      "startDt": "1742256000000",
+      "endDt": "1742688000000"
+    },
+    {
+      "id": 8562,
+      "name": "Pakistan tour of New Zealand, 2025",
+      "startDt": "1742083200000",
+      "endDt": "1743811200000"
+    },
+    {
+      "id": 9507,
+      "name": "Falkland Islands tour of Costa Rica 2025",
+      "startDt": "1741651200000",
+      "endDt": "1741824000000"
+    },
+    {
+      "id": 9480,
+      "name": "Malaysia Tri-Nation T20I Series, 2025",
+      "startDt": "1741564800000",
+      "endDt": "1742169600000"
+    },
+    {
+      "id": 9453,
+      "name": "Bahrain tour of Singapore, 2025",
+      "startDt": "1740700800000",
+      "endDt": "1741132800000"
+    },
+    {
+      "id": 9451,
+      "name": "USA tour of Oman T20I Series, 2025",
+      "startDt": "1740009600000",
+      "endDt": "1740268800000"
+    },
+    {
+      "id": 9325,
+      "name": "ICC Champions Trophy, 2025",
+      "startDt": "1739923200000",
+      "endDt": "1741478400000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 9426,
+      "name": "Bahrain tour of Indonesia, 2025",
+      "startDt": "1739923200000",
+      "endDt": "1740355200000"
+    },
+    {
+      "id": 8511,
+      "name": "Pakistan ODI Tri-Series, 2025",
+      "startDt": "1738972800000",
+      "endDt": "1739491200000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 9331,
+      "name": "Ireland tour of Zimbabwe, 2025",
+      "startDt": "1738800000000",
+      "endDt": "1740441600000"
+    },
+    {
+      "id": 9375,
+      "name": "Malta T20I Tri-Series, 2025",
+      "startDt": "1738540800000",
+      "endDt": "1738713600000"
+    },
+    {
+      "id": 9181,
+      "name": "Australia tour of Sri Lanka, 2025",
+      "startDt": "1738108800000",
+      "endDt": "1739491200000"
+    },
+    {
+      "id": 8402,
+      "name": "England tour of India, 2025",
+      "startDt": "1737504000000",
+      "endDt": "1739318400000",
+      "isLiveStreamEnabled": true
+    },
+    {
+      "id": 8504,
+      "name": "West Indies tour of Pakistan, 2025",
+      "startDt": "1736467200000",
+      "endDt": "1738022400000",
+      "isLiveStreamEnabled": true
+    }
+  ]
+}
