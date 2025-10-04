@@ -91,4 +91,14 @@ getPlayerBowlingStats(playerId: string, apiKey: string) {
     }
   );
 }
+
+// Get Venue Stats
+getVenueStats(venueId: string, apiKey: string): Observable<any> {
+  const url = `https://cricbuzz-cricket.p.rapidapi.com/stats/v1/venue/${venueId}`;
+  const headers = new HttpHeaders({
+    'X-RapidAPI-Key': apiKey,
+    'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+  }); 
+  return this.http.get(url, { headers });
+}
 }

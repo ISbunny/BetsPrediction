@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
   imports: [FormsModule, CommonModule],
 })
 export class Server {
+  venueStats: any = null;
   userMatchId: string = '';
   matchID: number = 0;
   teamAName: string = '';
@@ -44,106 +45,127 @@ export class Server {
           this.teamAName = teamA;
           this.teamBName = teamB;
 
-          // Fetch playing 11 for both teams and evaluate team strength only after both are loaded
-          const teamAId = response.team1.teamid;
-          const teamBId = response.team2.teamid;
-          this.appService
-            .getLiveScore(this.matchID, environment.rapidApiKey)
-            .subscribe({
-              next: (data) => {
-                console.log('Live Score Data:', data);
-                const innings = data?.scorecard[0];
-                if (!innings) {
-                  this.currentScore = 'Match not started';
-                  return;
+          const venueId = response.venue?.id || response.venueId;
+          const proceedWithPrediction = (venueStats: any) => {
+            this.venueStats = venueStats;
+            // Continue with fetching playing 11 and prediction logic here
+            // (move your playing 11 and prediction code inside this callback)
+
+            // Fetch playing 11 for both teams and evaluate team strength only after both are loaded
+            const teamAId = response.team1.teamid;
+            const teamBId = response.team2.teamid;
+            this.appService
+              .getLiveScore(this.matchID, environment.rapidApiKey)
+              .subscribe({
+                next: (data) => {
+                  console.log('Live Score Data:', data);
+                  const innings = data?.scorecard[0];
+                  if (!innings) {
+                    this.currentScore = 'Match not started';
+                    return;
+                  }
+
+                  const runs = innings.score;
+                  const wickets = innings.wickets;
+                  const overs = innings.overs;
+
+                  const rr = overs ? runs / overs : 0;
+                  let proj6 = rr * 6;
+
+                  // Fantasy-style adjustment
+                  if (wickets === 0) proj6 *= 1.1; // boost
+                  else if (wickets >= 2) proj6 *= 0.9; // penalty
+
+                  // Full T20 projection
+                  const proj20 = rr * 20;
+
+                  this.currentScore = `${runs}/${wickets} in ${overs} overs`;
+                  this.runRate = rr.toFixed(2);
+                  this.projected6 = Math.round(proj6);
+                  this.projected20 = Math.round(proj20);
+                },
+                error: (err) => {
+                  console.error('❌ Error fetching score:', err);
+                },
+              });
+            this.appService
+              .getPlaying11TeamA(matchId, teamAId, environment.rapidApiKey)
+              .subscribe(
+                (dataA) => {
+                  console.log('data', dataA);
+                  const squadAArray = dataA.player || dataA.players || [];
+                  const playingXI =
+                    squadAArray.find((g: any) => g.category === 'playing XI')
+                      ?.player || [];
+                  this.playing11TeamA = playingXI;
+                  console.log(teamA + ' Playing XI:', playingXI);
+
+                  this.appService
+                    .getPlaying11TeamB(matchId, teamBId, environment.rapidApiKey)
+                    .subscribe(
+                      (dataB) => {
+                        console.log('data', dataB);
+                        const squadBArray = dataB.player || dataB.players || [];
+                        const playingXI =
+                          squadBArray.find(
+                            (g: any) => g.category === 'playing XI'
+                          )?.player || [];
+                        this.playing11TeamB = playingXI;
+                        console.log(teamB + ' Playing XI:', playingXI);
+
+                        // Now both squads are loaded, evaluate team strengths
+                        Promise.all([
+                          this.fetchAndAttachPlayerStats(this.playing11TeamA),
+                          this.fetchAndAttachPlayerStats(this.playing11TeamB),
+                        ]).then(([teamAWithStats, teamBWithStats]) => {
+                          const teamAScore = this.evaluateTeamStrength(teamAWithStats,this.venueStats, /* isBattingFirst */ true);
+                          const teamBScore = this.evaluateTeamStrength(teamBWithStats,this.venueStats, /* isBattingFirst */ false);
+                          const [probA, probB] = this.hardWinChance(teamAScore, teamBScore);
+                          const winChanceA = probA;
+                          const winChanceB = probB;
+
+                          const result = {
+                            matchId,
+                            seriesName: response.seriesname,
+                            matchDesc: response.matchdesc,
+                            teamA,
+                            teamB,
+                            winChance: {
+                              [teamA]: winChanceA,
+                              [teamB]: winChanceB,
+                            },
+                          };
+                          this.predictionResult = result;
+                          // console.log('Prediction Result:', this.predictionResult);
+                        });
+                      },
+                      (error) => {
+                        console.error(
+                          'Error fetching team squad for Team B:',
+                          error
+                        );
+                      }
+                    );
+                },
+                (error) => {
+                  console.error('Error fetching playing 11 for Team A:', error);
                 }
+              );
+          };
 
-                const runs = innings.score;
-                const wickets = innings.wickets;
-                const overs = innings.overs;
-
-                const rr = overs ? runs / overs : 0;
-                let proj6 = rr * 6;
-
-                // Fantasy-style adjustment
-                if (wickets === 0) proj6 *= 1.1; // boost
-                else if (wickets >= 2) proj6 *= 0.9; // penalty
-
-                // Full T20 projection
-                const proj20 = rr * 20;
-
-                this.currentScore = `${runs}/${wickets} in ${overs} overs`;
-                this.runRate = rr.toFixed(2);
-                this.projected6 = Math.round(proj6);
-                this.projected20 = Math.round(proj20);
-              },
-              error: (err) => {
-                console.error('❌ Error fetching score:', err);
-              },
-            });
-          this.appService
-            .getPlaying11TeamA(matchId, teamAId, environment.rapidApiKey)
-            .subscribe(
-              (dataA) => {
-                console.log('data', dataA);
-                const squadAArray = dataA.player || dataA.players || [];
-                const playingXI =
-                  squadAArray.find((g: any) => g.category === 'playing XI')
-                    ?.player || [];
-                this.playing11TeamA = playingXI;
-                console.log(teamA + ' Playing XI:', playingXI);
-
-                this.appService
-                  .getPlaying11TeamB(matchId, teamBId, environment.rapidApiKey)
-                  .subscribe(
-                    (dataB) => {
-                      console.log('data', dataB);
-                      const squadBArray = dataB.player || dataB.players || [];
-                      const playingXI =
-                        squadBArray.find(
-                          (g: any) => g.category === 'playing XI'
-                        )?.player || [];
-                      this.playing11TeamB = playingXI;
-                      console.log(teamB + ' Playing XI:', playingXI);
-
-                      // Now both squads are loaded, evaluate team strengths
-                      Promise.all([
-                        this.fetchAndAttachPlayerStats(this.playing11TeamA),
-                        this.fetchAndAttachPlayerStats(this.playing11TeamB),
-                      ]).then(([teamAWithStats, teamBWithStats]) => {
-                        const teamAScore = this.evaluateTeamStrength(teamAWithStats);
-                        const teamBScore = this.evaluateTeamStrength(teamBWithStats);
-                        const [probA, probB] = this.hardWinChance(teamAScore, teamBScore);
-                        const winChanceA = probA;
-                        const winChanceB = probB;
-
-                        const result = {
-                          matchId,
-                          seriesName: response.seriesname,
-                          matchDesc: response.matchdesc,
-                          teamA,
-                          teamB,
-                          winChance: {
-                            [teamA]: winChanceA,
-                            [teamB]: winChanceB,
-                          },
-                        };
-                        this.predictionResult = result;
-                        // console.log('Prediction Result:', this.predictionResult);
-                      });
-                    },
-                    (error) => {
-                      console.error(
-                        'Error fetching team squad for Team B:',
-                        error
-                      );
-                    }
-                  );
+          if (venueId) {
+            this.appService.getVenueStats(venueId, environment.rapidApiKey).subscribe(
+              (venueStatsResp) => {
+                proceedWithPrediction(venueStatsResp.venueStats || []);
               },
               (error) => {
-                console.error('Error fetching playing 11 for Team A:', error);
+                console.error('Error fetching venue stats:', error);
+                proceedWithPrediction(null);
               }
             );
+          } else {
+            proceedWithPrediction(null);
+          }
         },
         (error) => {
           console.error('Error fetching match prediction:', error);
@@ -170,7 +192,7 @@ export class Server {
   };
 
   // Team strength calculation based on available fields
-  evaluateTeamStrength(players: any[]): number {
+  evaluateTeamStrength(players: any[], venueStats?: any, isBattingFirst?: boolean): number {
     let score = 0;
     for (const player of players) {
       let playerScore = 0;
@@ -211,6 +233,35 @@ export class Server {
 
       score += playerScore;
     }
+
+    // Influence by venue stats
+    if (venueStats) {
+      // Example: If batting first and venue favors bowling first, apply a penalty
+      const matchesWonBatFirst = this.parseVenueStat('Matches won batting first');
+      const matchesWonBowlFirst = this.parseVenueStat('Matches won bowling first');
+      if (matchesWonBatFirst !== null && matchesWonBowlFirst !== null) {
+        const total = matchesWonBatFirst + matchesWonBowlFirst;
+        if (total > 0) {
+          const batFirstWinPct = matchesWonBatFirst / total;
+          if (isBattingFirst && batFirstWinPct < 0.5) {
+            score *= 0.97; // small penalty if batting first is less successful
+          }
+          if (!isBattingFirst && batFirstWinPct > 0.5) {
+            score *= 0.97; // small penalty if bowling first is less successful
+          }
+        }
+      }
+      // Example: Use average 1st innings score as a bonus
+      const avgScores = this.venueStats.find((s: any) => s.key === 'Avg. scores recorded');
+      if (avgScores) {
+        const match = avgScores.value.match(/1st inns-(\d+)/);
+        if (match) {
+          const avg1stInns = parseInt(match[1], 10);
+          score += avg1stInns * 0.01; // small influence
+        }
+      }
+    }
+
     return score;
   }
 
@@ -285,6 +336,15 @@ export class Server {
       }
     }
     return players;
+  }
+
+  parseVenueStat(key: string): number | null {
+    if (!this.venueStats) return null;
+    const stat = this.venueStats.find((s: any) => s.key === key);
+    if (!stat) return null;
+    // Extract first number found in the value string
+    const match = stat.value.match(/\d+/);
+    return match ? parseInt(match[0], 10) : null;
   }
 }
 
