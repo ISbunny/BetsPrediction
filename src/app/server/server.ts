@@ -37,7 +37,7 @@ export class Server {
       .getMatchPrediction(matchId, environment.rapidApiKey)
       .subscribe(
         (response) => {
-          console.log(response);
+          // console.log(response);
           this.matchID = response.matchid;
           const teamA = response.team1.teamname;
           const teamB = response.team2.teamname;
@@ -45,7 +45,9 @@ export class Server {
           this.teamAName = teamA;
           this.teamBName = teamB;
 
-          const venueId = response.venue?.id || response.venueId;
+          const venueId = response.venueinfo?.id || response.venue?.id || response.venueId;
+          console.log('Venue ID found:', venueId);
+          console.log('Venue info:', response.venueinfo);
           const proceedWithPrediction = (venueStats: any) => {
             this.venueStats = venueStats;
             // Continue with fetching playing 11 and prediction logic here
@@ -58,7 +60,7 @@ export class Server {
               .getLiveScore(this.matchID, environment.rapidApiKey)
               .subscribe({
                 next: (data) => {
-                  console.log('Live Score Data:', data);
+                  // console.log('Live Score Data:', data);
                   const innings = data?.scorecard[0];
                   if (!innings) {
                     this.currentScore = 'Match not started';
@@ -92,7 +94,7 @@ export class Server {
               .getPlaying11TeamA(matchId, teamAId, environment.rapidApiKey)
               .subscribe(
                 (dataA) => {
-                  console.log('data', dataA);
+                  // console.log('data', dataA);
                   const squadAArray = dataA.player || dataA.players || [];
                   const playingXI =
                     squadAArray.find((g: any) => g.category === 'playing XI')
@@ -101,28 +103,76 @@ export class Server {
                   console.log(teamA + ' Playing XI:', playingXI);
 
                   this.appService
-                    .getPlaying11TeamB(matchId, teamBId, environment.rapidApiKey)
+                    .getPlaying11TeamB(
+                      matchId,
+                      teamBId,
+                      environment.rapidApiKey
+                    )
                     .subscribe(
                       (dataB) => {
-                        console.log('data', dataB);
+                        // console.log('data', dataB);
                         const squadBArray = dataB.player || dataB.players || [];
                         const playingXI =
                           squadBArray.find(
                             (g: any) => g.category === 'playing XI'
                           )?.player || [];
                         this.playing11TeamB = playingXI;
-                        console.log(teamB + ' Playing XI:', playingXI);
+                        // console.log(teamB + ' Playing XI:', playingXI);
+                        const tossStatus =
+                          response.tossstatus || response.status || '';
+                        let teamAIsBattingFirst = false;
+                        let teamBIsBattingFirst = false;
+                        // console.log('Raw tossStatus:', tossStatus);
 
+                        if (tossStatus) {
+                          // Example: "Durban Super Giants opt to bowl"
+                          const match = tossStatus.match(
+                            /^(.*?) opt to (bat|bowl)$/i
+                          );
+                          if (match) {
+                            const tossWinner = match[1].trim();
+                            const decision = match[2].trim();
+                            // console.log('Parsed tossWinner:', tossWinner, 'Decision:', decision);
+                            if (tossWinner === teamA) {
+                              teamAIsBattingFirst = decision !== 'bowl';
+                              teamBIsBattingFirst = !teamAIsBattingFirst;
+                              // console.log(`${teamA} is batting first: ${teamAIsBattingFirst}`);
+                            } else if (tossWinner === teamB) {
+                              teamBIsBattingFirst = decision !== 'bowl';
+                              teamAIsBattingFirst = !teamBIsBattingFirst;
+                              // console.log(`${teamB} is batting first: ${teamBIsBattingFirst}`);
+                            }
+                          } else {
+                            console.warn(
+                              'Could not parse tossStatus:',
+                              tossStatus
+                            );
+                          }
+                        }
                         // Now both squads are loaded, evaluate team strengths
                         Promise.all([
                           this.fetchAndAttachPlayerStats(this.playing11TeamA),
                           this.fetchAndAttachPlayerStats(this.playing11TeamB),
                         ]).then(([teamAWithStats, teamBWithStats]) => {
-                          const teamAScore = this.evaluateTeamStrength(teamAWithStats,this.venueStats, /* isBattingFirst */ true);
-                          const teamBScore = this.evaluateTeamStrength(teamBWithStats,this.venueStats, /* isBattingFirst */ false);
-                          const [probA, probB] = this.hardWinChance(teamAScore, teamBScore);
-                          const winChanceA = probA;
-                          const winChanceB = probB;
+                          const teamAScore = this.evaluateTeamStrength(
+                            teamAWithStats,
+                            this.venueStats,
+                            /* isBattingFirst */ teamAIsBattingFirst,
+                            teamA
+                          );
+                          const teamBScore = this.evaluateTeamStrength(
+                            teamBWithStats,
+                            this.venueStats,
+                            /* isBattingFirst */ teamBIsBattingFirst,
+                            teamB
+                          );
+                          // const scale = 0.2;
+                          const [probA, probB] = this.softmax(
+                            teamAScore,
+                            teamBScore
+                          );
+                          const winChanceA = Math.round(probA * 100);
+                          const winChanceB = Math.round(probB * 100);
 
                           const result = {
                             matchId,
@@ -154,15 +204,18 @@ export class Server {
           };
 
           if (venueId) {
-            this.appService.getVenueStats(venueId, environment.rapidApiKey).subscribe(
-              (venueStatsResp) => {
-                proceedWithPrediction(venueStatsResp.venueStats || []);
-              },
-              (error) => {
-                console.error('Error fetching venue stats:', error);
-                proceedWithPrediction(null);
-              }
-            );
+            console.log('Fetching venue stats for ID:', venueId);
+            this.appService
+              .getVenueStats(venueId, environment.rapidApiKey)
+              .subscribe(
+                (venueStatsResp) => {
+                  proceedWithPrediction(venueStatsResp.venueStats || []);
+                },
+                (error) => {
+                  console.error('Error fetching venue stats:', error);
+                  proceedWithPrediction(null);
+                }
+              );
           } else {
             proceedWithPrediction(null);
           }
@@ -192,22 +245,34 @@ export class Server {
   };
 
   // Team strength calculation based on available fields
-  evaluateTeamStrength(players: any[], venueStats?: any, isBattingFirst?: boolean): number {
+  evaluateTeamStrength(
+    players: any[],
+    venueStats?: any,
+    isBattingFirst?: boolean,
+    teamName?: string
+  ): number {
     let score = 0;
     for (const player of players) {
+      // console.log(`Evaluating player:`, player);
       let playerScore = 0;
       if (player.captain) playerScore += this.WEIGHTS.captain;
       if (player.keeper) playerScore += this.WEIGHTS.keeper;
       if (player.isoverseas) playerScore += this.WEIGHTS.overseas;
 
       // Use player stats if available
-      if (typeof player.battingAverage === 'number' && player.battingAverage > 0) {
+      if (
+        typeof player.battingAverage === 'number' &&
+        player.battingAverage > 0
+      ) {
         playerScore += player.battingAverage * 0.2; // weight for batting average
       }
       if (typeof player.strikeRate === 'number' && player.strikeRate > 0) {
         playerScore += player.strikeRate * 0.05; // weight for strike rate
       }
-      if (typeof player.bowlingAverage === 'number' && player.bowlingAverage > 0) {
+      if (
+        typeof player.bowlingAverage === 'number' &&
+        player.bowlingAverage > 0
+      ) {
         playerScore += (50 - player.bowlingAverage) * 0.2; // lower avg is better
       }
       if (typeof player.economyRate === 'number' && player.economyRate > 0) {
@@ -234,34 +299,64 @@ export class Server {
       score += playerScore;
     }
 
-    // Influence by venue stats
+    console.log(
+      `[${teamName || 'Team'}] Score after player stats/roles:`,
+      score
+    );
+    console.log('venueStats parameter:', venueStats);
+    console.log('this.venueStats:', this.venueStats);
+    console.log('venueStats truthy check:', !!venueStats);
+    // Venue/toss influence
     if (venueStats) {
-      // Example: If batting first and venue favors bowling first, apply a penalty
-      const matchesWonBatFirst = this.parseVenueStat('Matches won batting first');
-      const matchesWonBowlFirst = this.parseVenueStat('Matches won bowling first');
+      
+      const matchesWonBatFirst = this.parseVenueStat(
+        'Matches won batting first'
+      );
+      console.log('Matches won batting first:', matchesWonBatFirst);
+      const matchesWonBowlFirst = this.parseVenueStat(
+        'Matches won bowling first'
+      );
       if (matchesWonBatFirst !== null && matchesWonBowlFirst !== null) {
         const total = matchesWonBatFirst + matchesWonBowlFirst;
         if (total > 0) {
           const batFirstWinPct = matchesWonBatFirst / total;
+          if (isBattingFirst && batFirstWinPct > 0.5) {
+            // Bonus for batting first if batting first is favored
+            score *= 1.03;
+          }
+          if (!isBattingFirst && batFirstWinPct < 0.5) {
+            // Bonus for bowling first if bowling first is favored
+            score *= 1.03;
+          }
           if (isBattingFirst && batFirstWinPct < 0.5) {
-            score *= 0.97; // small penalty if batting first is less successful
+            // Penalty for batting first if bowling first is favored
+            score *= 0.97;
           }
           if (!isBattingFirst && batFirstWinPct > 0.5) {
-            score *= 0.97; // small penalty if bowling first is less successful
+            // Penalty for bowling first if batting first is favored
+            score *= 0.97;
           }
         }
       }
-      // Example: Use average 1st innings score as a bonus
-      const avgScores = this.venueStats.find((s: any) => s.key === 'Avg. scores recorded');
+      const avgScores = this.venueStats.find(
+        (s: any) => s.key === 'Avg. scores recorded'
+      );
+      console.log('Avg Scores Stat:', avgScores);
       if (avgScores) {
         const match = avgScores.value.match(/1st inns-(\d+)/);
         if (match) {
           const avg1stInns = parseInt(match[1], 10);
-          score += avg1stInns * 0.01; // small influence
+          score += avg1stInns * 0.01;
+          console.log(
+            `[${teamName || 'Team'}] Venue avg 1st inns bonus: +${
+              avg1stInns * 0.01
+            }`
+          );
         }
       }
     }
 
+    console.log(`[${teamName || 'Team'}] Final score after venue/toss:`, score);
     return score;
   }
 
@@ -277,10 +372,10 @@ export class Server {
     return a > b ? [100, 0] : [0, 100];
   }
 
-  fetchSeries() : void {
+  fetchSeries(): void {
     this.appService.GetSeriesArchieve(2025, environment.rapidApiKey).subscribe(
       (response) => {
-        console.log('Series Archive Response:', response);
+        // console.log('Series Archive Response:', response);
       },
       (error) => {
         console.error('Error fetching series archive:', error);
@@ -292,9 +387,13 @@ export class Server {
     const apiKey = environment.rapidApiKey;
     for (const player of players) {
       try {
-        const battingStatsRaw = await this.appService.getPlayerBattingStats(player.id, apiKey).toPromise();
+        const battingStatsRaw = await this.appService
+          .getPlayerBattingStats(player.id, apiKey)
+          .toPromise();
         await delay(300); // 300ms delay to avoid rate limit
-        const bowlingStatsRaw = await this.appService.getPlayerBowlingStats(player.id, apiKey).toPromise();
+        const bowlingStatsRaw = await this.appService
+          .getPlayerBowlingStats(player.id, apiKey)
+          .toPromise();
         await delay(300);
 
         const battingStats = battingStatsRaw as any;
@@ -328,9 +427,9 @@ export class Server {
           }
         }
 
-        console.log(
-          `Stats for ${player.name}: BatAvg=${player.battingAverage}, SR=${player.strikeRate}, BowlAvg=${player.bowlingAverage}, Econ=${player.economyRate}`
-        );
+        // console.log(
+        //   `Stats for ${player.name}: BatAvg=${player.battingAverage}, SR=${player.strikeRate}, BowlAvg=${player.bowlingAverage}, Econ=${player.economyRate}`
+        // );
       } catch (e) {
         console.warn(`Stats not found for player ${player.name}:`, e);
       }
@@ -349,5 +448,5 @@ export class Server {
 }
 
 function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
