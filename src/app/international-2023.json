@@ -1,0 +1,530 @@
+[
+  {
+    "id": 7404,
+    "name": "Afghanistan tour of United Arab Emirates 2023-24",
+    "startDt": "1703808000000",
+    "endDt": "1704153600000"
+  },
+  {
+    "id": 7415,
+    "name": "Philippines tour of Indonesia T20I Series 2023",
+    "startDt": "1703203200000",
+    "endDt": "1703548800000"
+  },
+  {
+    "id": 6878,
+    "name": "Bangladesh tour of New Zealand, 2023",
+    "startDt": "1702771200000",
+    "endDt": "1703980800000"
+  },
+  {
+    "id": 7399,
+    "name": "Africa Cricket Association Cup 2023",
+    "startDt": "1702252800000",
+    "endDt": "1702944000000"
+  },
+  {
+    "id": 6857,
+    "name": "India tour of South Africa, 2023-24",
+    "startDt": "1702166400000",
+    "endDt": "1704585600000"
+  },
+  {
+    "id": 7275,
+    "name": "Ireland tour of Zimbabwe, 2023",
+    "startDt": "1701907200000",
+    "endDt": "1702771200000"
+  },
+  {
+    "id": 7383,
+    "name": "East-West Africa Cup Qualifiers 2023",
+    "startDt": "1701820800000",
+    "endDt": "1702166400000"
+  },
+  {
+    "id": 6290,
+    "name": "Pakistan tour of Australia, 2023-24",
+    "startDt": "1701820800000",
+    "endDt": "1704585600000"
+  },
+  {
+    "id": 6228,
+    "name": "England tour of West Indies, 2023",
+    "startDt": "1701561600000",
+    "endDt": "1703203200000"
+  },
+  {
+    "id": 7233,
+    "name": "Australia tour of India, 2023",
+    "startDt": "1700697600000",
+    "endDt": "1701561600000"
+  },
+  {
+    "id": 7268,
+    "name": "ICC Mens T20 World Cup Africa Region Qualifier 2023",
+    "startDt": "1700611200000",
+    "endDt": "1701302400000"
+  },
+  {
+    "id": 7264,
+    "name": "Cambodia tour of Indonesia 2023",
+    "startDt": "1700438400000",
+    "endDt": "1700697600000"
+  },
+  {
+    "id": 7231,
+    "name": "ICC Mens T20I World Cup Asia Finals 2023",
+    "startDt": "1698624000000",
+    "endDt": "1699142400000"
+  },
+  {
+    "id": 7226,
+    "name": "Zimbabwe tour of Namibia 2023",
+    "startDt": "1698105600000",
+    "endDt": "1698624000000"
+  },
+  {
+    "id": 7198,
+    "name": "Nepal T20I Tri-Series 2023",
+    "startDt": "1697587200000",
+    "endDt": "1698364800000"
+  },
+  {
+    "id": 7212,
+    "name": "Luxembourg tour of Gibraltar 2023",
+    "startDt": "1697328000000",
+    "endDt": "1697328000000"
+  },
+  {
+    "id": 7196,
+    "name": "Serbia tour of Gibraltar 2023",
+    "startDt": "1696464000000",
+    "endDt": "1696464000000"
+  },
+  {
+    "id": 6732,
+    "name": "ICC Cricket World Cup 2023",
+    "startDt": "1696464000000",
+    "endDt": "1700352000000"
+  },
+  {
+    "id": 7189,
+    "name": "West Africa Trophy 2023",
+    "startDt": "1696377600000",
+    "endDt": "1697328000000"
+  },
+  {
+    "id": 7004,
+    "name": "Estonia tour of Gibraltar 2023",
+    "startDt": "1696032000000",
+    "endDt": "1696032000000"
+  },
+  {
+    "id": 7180,
+    "name": "ICC Mens T20 World Cup Americas Region Final 2023",
+    "startDt": "1696032000000",
+    "endDt": "1696636800000"
+  },
+  {
+    "id": 7158,
+    "name": "ICC Mens T20 World Cup Sub Regional Asia Qualifier A 2023",
+    "startDt": "1695859200000",
+    "endDt": "1696464000000"
+  },
+  {
+    "id": 7163,
+    "name": "Asian Games Mens T20I 2023",
+    "startDt": "1695772800000",
+    "endDt": "1696636800000"
+  },
+  {
+    "id": 6913,
+    "name": "Australia tour of India, 2023",
+    "startDt": "1695340800000",
+    "endDt": "1695772800000"
+  },
+  {
+    "id": 6694,
+    "name": "New Zealand tour of Bangladesh, 2023",
+    "startDt": "1695254400000",
+    "endDt": "1702166400000"
+  },
+  {
+    "id": 4805,
+    "name": "Ireland tour of England ODI Series, 2023",
+    "startDt": "1695168000000",
+    "endDt": "1695686400000"
+  },
+  {
+    "id": 7149,
+    "name": "Malaysia T20I Tri-Series 2023",
+    "startDt": "1695081600000",
+    "endDt": "1695513600000"
+  },
+  {
+    "id": 7135,
+    "name": "Gulf Cricket T20I Championship 2023",
+    "startDt": "1694736000000",
+    "endDt": "1695427200000"
+  },
+  {
+    "id": 6906,
+    "name": "Asia Cup, 2023",
+    "startDt": "1693353600000",
+    "endDt": "1694908800000"
+  },
+  {
+    "id": 6242,
+    "name": "Australia tour of South Africa, 2023",
+    "startDt": "1693353600000",
+    "endDt": "1694908800000"
+  },
+  {
+    "id": 4791,
+    "name": "New Zealand tour of England, 2023",
+    "startDt": "1692921600000",
+    "endDt": "1694736000000"
+  },
+  {
+    "id": 6934,
+    "name": "Afghanistan v Pakistan in Sri Lanka, 2023",
+    "startDt": "1692662400000",
+    "endDt": "1693008000000"
+  },
+  {
+    "id": 7066,
+    "name": "East Africa Cup 2023",
+    "startDt": "1692489600000",
+    "endDt": "1693440000000"
+  },
+  {
+    "id": 6997,
+    "name": "Continental Cup 2023",
+    "startDt": "1692316800000",
+    "endDt": "1692489600000"
+  },
+  {
+    "id": 6836,
+    "name": "India tour of Ireland, 2023",
+    "startDt": "1692316800000",
+    "endDt": "1692748800000"
+  },
+  {
+    "id": 5973,
+    "name": "New Zealand tour of United Arab Emirates, 2023",
+    "startDt": "1692230400000",
+    "endDt": "1692489600000"
+  },
+  {
+    "id": 6955,
+    "name": "Germany v Guernsey in Netherlands, 2023",
+    "startDt": "1691971200000",
+    "endDt": "1692057600000"
+  },
+  {
+    "id": 6948,
+    "name": "Budapest Cup 2023",
+    "startDt": "1691193600000",
+    "endDt": "1691280000000"
+  },
+  {
+    "id": 6687,
+    "name": "ICC Mens T20 World Cup Asia Qualifier B 2023",
+    "startDt": "1690329600000",
+    "endDt": "1690848000000"
+  },
+  {
+    "id": 6340,
+    "name": "ICC Mens T20 World Cup East Asia Pacific Qualifier 2023",
+    "startDt": "1689984000000",
+    "endDt": "1690588800000"
+  },
+  {
+    "id": 6333,
+    "name": "ICC Mens T20 World Cup Europe Qualifier 2023",
+    "startDt": "1689811200000",
+    "endDt": "1690502400000"
+  },
+  {
+    "id": 6752,
+    "name": "Valletta Cup 2023",
+    "startDt": "1689120000000",
+    "endDt": "1689465600000"
+  },
+  {
+    "id": 6582,
+    "name": "India tour of West Indies, 2023",
+    "startDt": "1689120000000",
+    "endDt": "1691884800000"
+  },
+  {
+    "id": 6652,
+    "name": "Pakistan tour of Sri Lanka, 2023",
+    "startDt": "1689033600000",
+    "endDt": "1690502400000"
+  },
+  {
+    "id": 6759,
+    "name": "Mdina Cup 2023",
+    "startDt": "1688947200000",
+    "endDt": "1689120000000"
+  },
+  {
+    "id": 6683,
+    "name": "Austria tour of Isle of Man, 2023",
+    "startDt": "1688860800000",
+    "endDt": "1688947200000"
+  },
+  {
+    "id": 6676,
+    "name": "Inter-Insular Mens T20I Series 2023",
+    "startDt": "1688688000000",
+    "endDt": "1688774400000"
+  },
+  {
+    "id": 6669,
+    "name": "Austria v Germany in Netherlands, 2023",
+    "startDt": "1687996800000",
+    "endDt": "1688083200000"
+  },
+  {
+    "id": 6666,
+    "name": "Switzerland tour of Luxembourg, 2023",
+    "startDt": "1687564800000",
+    "endDt": "1687651200000"
+  },
+  {
+    "id": 6659,
+    "name": "Bulgaria Quadrangular Series 2023",
+    "startDt": "1687478400000",
+    "endDt": "1687651200000"
+  },
+  {
+    "id": 6437,
+    "name": "ICC Cricket World Cup Qualifiers 2023",
+    "startDt": "1687046400000",
+    "endDt": "1688860800000"
+  },
+  {
+    "id": 4777,
+    "name": "The Ashes, 2023",
+    "startDt": "1686873600000",
+    "endDt": "1690761600000"
+  },
+  {
+    "id": 6351,
+    "name": "Afghanistan tour of Bangladesh, 2023",
+    "startDt": "1686700800000",
+    "endDt": "1689465600000"
+  },
+  {
+    "id": 6606,
+    "name": "Central Europe Cup 2023",
+    "startDt": "1686355200000",
+    "endDt": "1686441600000"
+  },
+  {
+    "id": 6599,
+    "name": "Belgium tour of Germany, 2023",
+    "startDt": "1686268800000",
+    "endDt": "1686441600000"
+  },
+  {
+    "id": 6589,
+    "name": "Africa Continental Cup 2023",
+    "startDt": "1686268800000",
+    "endDt": "1687305600000"
+  },
+  {
+    "id": 5917,
+    "name": "ICC World Test Championship Final 2023",
+    "startDt": "1686096000000",
+    "endDt": "1686528000000"
+  },
+  {
+    "id": 6255,
+    "name": "West Indies tour of UAE, 2023",
+    "startDt": "1685836800000",
+    "endDt": "1686268800000"
+  },
+  {
+    "id": 6248,
+    "name": "Afghanistan tour of Sri Lanka, 2023",
+    "startDt": "1685664000000",
+    "endDt": "1686096000000"
+  },
+  {
+    "id": 6521,
+    "name": "Southern Africa Cup 2023",
+    "startDt": "1685145600000",
+    "endDt": "1685577600000"
+  },
+  {
+    "id": 4786,
+    "name": "Ireland tour of England Only Test, 2023",
+    "startDt": "1685059200000",
+    "endDt": "1685836800000"
+  },
+  {
+    "id": 6235,
+    "name": "Nordic T20I Cup 2023",
+    "startDt": "1684368000000",
+    "endDt": "1684627200000"
+  },
+  {
+    "id": 6022,
+    "name": "Ireland v Bangladesh in England, 2023",
+    "startDt": "1683590400000",
+    "endDt": "1684022400000"
+  },
+  {
+    "id": 6193,
+    "name": "Gibraltar T20I Tri-Series 2023",
+    "startDt": "1683158400000",
+    "endDt": "1683417600000"
+  },
+  {
+    "id": 6214,
+    "name": "SEA Games Mens Twenty20 Cricket Competition 2023",
+    "startDt": "1682899200000",
+    "endDt": "1683763200000"
+  },
+  {
+    "id": 5913,
+    "name": "Ireland tour of Sri Lanka, 2023",
+    "startDt": "1681603200000",
+    "endDt": "1682640000000"
+  },
+  {
+    "id": 4896,
+    "name": "New Zealand tour of Pakistan, 2023",
+    "startDt": "1681430400000",
+    "endDt": "1683417600000"
+  },
+  {
+    "id": 6155,
+    "name": "Gibraltar tour of Portugal, 2023",
+    "startDt": "1681084800000",
+    "endDt": "1681171200000"
+  },
+  {
+    "id": 4861,
+    "name": "Netherlands tour of South Africa, 2023",
+    "startDt": "1679961600000",
+    "endDt": "1680393600000"
+  },
+  {
+    "id": 6025,
+    "name": "ICC Cricket World Cup Qualifier Play-off 2023",
+    "startDt": "1679788800000",
+    "endDt": "1680652800000"
+  },
+  {
+    "id": 5987,
+    "name": "Afghanistan v Pakistan in UAE, 2023",
+    "startDt": "1679616000000",
+    "endDt": "1679875200000"
+  },
+  {
+    "id": 5980,
+    "name": "Netherlands tour of Zimbabwe, 2023",
+    "startDt": "1679356800000",
+    "endDt": "1679702400000"
+  },
+  {
+    "id": 5490,
+    "name": "Ireland tour of Bangladesh, 2023",
+    "startDt": "1678838400000",
+    "endDt": "1680912000000"
+  },
+  {
+    "id": 5966,
+    "name": "Hong Kong Quadrangular Series 2023",
+    "startDt": "1678233600000",
+    "endDt": "1678579200000"
+  },
+  {
+    "id": 4415,
+    "name": "Sri Lanka tour New Zealand, 2023",
+    "startDt": "1677888000000",
+    "endDt": "1680912000000"
+  },
+  {
+    "id": 5276,
+    "name": "England tour of Bangladesh, 2023",
+    "startDt": "1677628800000",
+    "endDt": "1678752000000"
+  },
+  {
+    "id": 5959,
+    "name": "ICC Mens T20 World Cup Americas Qualifier 2023",
+    "startDt": "1677283200000",
+    "endDt": "1677888000000"
+  },
+  {
+    "id": 5847,
+    "name": "Isle of Man tour of Spain, 2023",
+    "startDt": "1677196800000",
+    "endDt": "1677369600000"
+  },
+  {
+    "id": 5952,
+    "name": "Bermuda tour of Argentina, 2023",
+    "startDt": "1676937600000",
+    "endDt": "1677024000000"
+  },
+  {
+    "id": 4854,
+    "name": "West Indies tour of South Africa, 2023",
+    "startDt": "1676937600000",
+    "endDt": "1679961600000"
+  },
+  {
+    "id": 5896,
+    "name": "Afghanistan tour of United Arab Emirates, 2023",
+    "startDt": "1676505600000",
+    "endDt": "1676764800000"
+  },
+  {
+    "id": 5204,
+    "name": "Australia tour of India, 2023",
+    "startDt": "1675900800000",
+    "endDt": "1679443200000"
+  },
+  {
+    "id": 4413,
+    "name": "England tour of New Zealand, 2023",
+    "startDt": "1675814400000",
+    "endDt": "1677542400000"
+  },
+  {
+    "id": 5260,
+    "name": "West Indies tour of Zimbabwe, 2023",
+    "startDt": "1674864000000",
+    "endDt": "1676505600000"
+  },
+  {
+    "id": 4847,
+    "name": "England tour of South Africa, 2023",
+    "startDt": "1674777600000",
+    "endDt": "1675209600000"
+  },
+  {
+    "id": 5199,
+    "name": "New Zealand tour of India, 2023",
+    "startDt": "1674000000000",
+    "endDt": "1675209600000"
+  },
+  {
+    "id": 5213,
+    "name": "Ireland tour of Zimbabwe, 2023",
+    "startDt": "1673481600000",
+    "endDt": "1674432000000"
+  },
+  {
+    "id": 5197,
+    "name": "Sri Lanka tour of India, 2023",
+    "startDt": "1672704000000",
+    "endDt": "1673740800000"
+  }
+]

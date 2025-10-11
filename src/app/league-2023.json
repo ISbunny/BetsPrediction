@@ -1,0 +1,143 @@
+{
+  "date": "2023",
+  "series": [
+    {
+      "id": 7151,
+      "name": "Super Smash 2023-24",
+      "startDt": "1702944000000",
+      "endDt": "1706400000000"
+    },
+    {
+      "id": 6822,
+      "name": "Big Bash League 2023-24",
+      "startDt": "1701907200000",
+      "endDt": "1706054400000"
+    },
+    {
+      "id": 7350,
+      "name": "T10 League 2023",
+      "startDt": "1701129600000",
+      "endDt": "1702080000000"
+    },
+    {
+      "id": 7243,
+      "name": "Legends League Cricket 2023",
+      "startDt": "1700265600000",
+      "endDt": "1702080000000"
+    },
+    {
+      "id": 7168,
+      "name": "Road Safety World Series T20 2023 (Postponed)",
+      "startDt": "1695427200000",
+      "endDt": "1696118400000"
+    },
+    {
+      "id": 7088,
+      "name": "Rajasthan Premier League 2023",
+      "startDt": "1693094400000",
+      "endDt": "1694304000000"
+    },
+    {
+      "id": 7058,
+      "name": "Saurashtra Premier League 2023",
+      "startDt": "1692748800000",
+      "endDt": "1693440000000"
+    },
+    {
+      "id": 7012,
+      "name": "US Masters T10 League 2023",
+      "startDt": "1692316800000",
+      "endDt": "1693094400000"
+    },
+    {
+      "id": 6204,
+      "name": "Caribbean Premier League 2023",
+      "startDt": "1692144000000",
+      "endDt": "1695513600000"
+    },
+    {
+      "id": 6941,
+      "name": "Maharaja Trophy KSCA T20 2023",
+      "startDt": "1691884800000",
+      "endDt": "1693267200000"
+    },
+    {
+      "id": 5924,
+      "name": "The Hundred Mens Competition 2023",
+      "startDt": "1690848000000",
+      "endDt": "1693094400000"
+    },
+    {
+      "id": 6648,
+      "name": "Lanka Premier League 2023",
+      "startDt": "1690675200000",
+      "endDt": "1692489600000"
+    },
+    {
+      "id": 6829,
+      "name": "Global T20 Canada 2023",
+      "startDt": "1689811200000",
+      "endDt": "1691280000000"
+    },
+    {
+      "id": 6843,
+      "name": "Zim Afro T10 2023",
+      "startDt": "1689811200000",
+      "endDt": "1690588800000"
+    },
+    {
+      "id": 6620,
+      "name": "Major League Cricket 2023",
+      "startDt": "1689206400000",
+      "endDt": "1690675200000"
+    },
+    {
+      "id": 6158,
+      "name": "Tamil Nadu Premier League 2023",
+      "startDt": "1686528000000",
+      "endDt": "1689120000000"
+    },
+    {
+      "id": 5246,
+      "name": "T20 Blast 2023",
+      "startDt": "1684540800000",
+      "endDt": "1689379200000"
+    },
+    {
+      "id": 5945,
+      "name": "Indian Premier League 2023",
+      "startDt": "1680220800000",
+      "endDt": "1685318400000"
+    },
+    {
+      "id": 5969,
+      "name": "Legends League Cricket 2023",
+      "startDt": "1678406400000",
+      "endDt": "1679270400000"
+    },
+    {
+      "id": 5441,
+      "name": "Pakistan Super League, 2023",
+      "startDt": "1676246400000",
+      "endDt": "1679097600000"
+    },
+    {
+      "id": 5106,
+      "name": "International League T20, 2023",
+      "startDt": "1673568000000",
+      "endDt": "1676160000000"
+    },
+    {
+      "id": 4994,
+      "name": "SA20, 2023",
+      "startDt": "1673308800000",
+      "endDt": "1676160000000"
+    },
+    {
+      "id": 5255,
+      "name": "Bangladesh Premier League 2023",
+      "startDt": "1672963200000",
+      "endDt": "1676505600000"
+    }
+  ]
+}

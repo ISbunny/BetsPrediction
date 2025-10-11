@@ -55,4 +55,50 @@ getPlaying11TeamB(matchId: string, teamId: string, apiKey: string): Observable<a
 
     return this.http.get(url, { headers });
   }
+
+  // Get Series list archieve
+  GetSeriesArchieve(year: number, apiKey: string): Observable<any> {
+  const url = `https://cricbuzz-cricket.p.rapidapi.com/series/v1/archives/league`;
+  const headers = new HttpHeaders({
+    'X-RapidAPI-Key': apiKey,
+    'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+  });
+  return this.http.get(url, { 
+    headers,
+    params: { year: year.toString() }
+   });
+}
+getPlayerBattingStats(playerId: string, apiKey: string) {
+  return this.http.get(
+    `https://cricbuzz-cricket.p.rapidapi.com/stats/v1/player/${playerId}/batting`,
+    {
+      headers: {
+        'X-RapidAPI-Key': apiKey,
+        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com',
+      },
+    }
+  );
+}
+
+getPlayerBowlingStats(playerId: string, apiKey: string) {
+  return this.http.get(
+    `https://cricbuzz-cricket.p.rapidapi.com/stats/v1/player/${playerId}/bowling`,
+    {
+      headers: {
+        'X-RapidAPI-Key': apiKey,
+        'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com',
+      },
+    }
+  );
+}
+
+// Get Venue Stats
+getVenueStats(venueId: string, apiKey: string): Observable<any> {
+  const url = `https://cricbuzz-cricket.p.rapidapi.com/stats/v1/venue/${venueId}`;
+  const headers = new HttpHeaders({
+    'X-RapidAPI-Key': apiKey,
+    'X-RapidAPI-Host': 'cricbuzz-cricket.p.rapidapi.com'
+  }); 
+  return this.http.get(url, { headers });
+}
 }
