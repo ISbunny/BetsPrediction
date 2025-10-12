@@ -343,17 +343,19 @@ export class Server {
       );
       console.log('Avg Scores Stat:', avgScores);
       if (avgScores) {
-        const match = avgScores.value.match(/1st inns-(\d+)/);
-        if (match) {
-          const avg1stInns = parseInt(match[1], 10);
-          score += avg1stInns * 0.01;
-          console.log(
-            `[${teamName || 'Team'}] Venue avg 1st inns bonus: +${
-              avg1stInns * 0.01
-            }`
-          );
-        }
-      }
+  const match1st = avgScores.value.match(/1st inns-(\d+)/);
+  const match2nd = avgScores.value.match(/2nd inns-(\d+)/);
+  
+  if (isBattingFirst && match1st) {
+    const avg1stInns = parseInt(match1st[1], 10);
+    score += avg1stInns * 0.01;
+    console.log(`[${teamName}] Venue avg 1st inns bonus: +${avg1stInns * 0.01}`);
+  } else if (!isBattingFirst && match2nd) {
+    const avg2ndInns = parseInt(match2nd[1], 10);
+    score += avg2ndInns * 0.01;
+    console.log(`[${teamName}] Venue avg 2nd inns bonus: +${avg2ndInns * 0.01}`);
+  }
+}
     }
 
     console.log(`[${teamName || 'Team'}] Final score after venue/toss:`, score);
